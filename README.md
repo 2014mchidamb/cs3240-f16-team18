@@ -1,3 +1,3 @@
-# cs3240-f16-team18 <-- This is us
+# cs3240-f16-team18
 
-We are the best group.
+Secure file sharing.
