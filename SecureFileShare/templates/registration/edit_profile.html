@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% load crispy_forms_tags %}
+
+{% block content %}
+	<div class="col-md-4 text-center">
+		<div class="span12">
+		{% crispy user_form user_form.helper %}
+		{% crispy profile_form profile_form.helper %}
+		<div class="span12">
+	</div>
+{% endblock content %}

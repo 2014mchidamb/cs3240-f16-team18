@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="row">
+	<div class="col-md-6 offset-md-3">
+		<h2> First Name: {{request.user.first_name}} </h2>
+		<h2> Last Name: {{request.user.last_name}} </h2>
+		<h2> Email: {{request.user.email}} </h2>
+		<h2> Site Manager: {{request.user.profile.site_manager}} </h2>
+		<a class="btn btn-primary" href="/accounts/profile/edit/" role="button"> Edit </a>
+	</div>
+</div>
+{% endblock content %}

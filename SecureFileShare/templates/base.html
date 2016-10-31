@@ -49,6 +49,17 @@
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav">
+					{% if user.is_authenticated %}
+					<li>
+						<a href="/accounts/profile">Profile</a>
+					</li>
+					<li>
+						<a href="/accounts/logout">Logout</a>
+					</li>
+					<li>
+                        <a href="/myreports">View My Reports</a>
+                    </li>
+					{% else %}
                     <li>
                         <a href="/">About</a>
                     </li>
@@ -58,9 +69,7 @@
                     <li>
                         <a href="/accounts/register">Register</a>
                     </li>
-					<li>
-                        <a href="/myreports">View My Reports</a>
-                    </li>
+					{% endif %}
                 </ul>
             </div>
             <!-- /.navbar-collapse -->
