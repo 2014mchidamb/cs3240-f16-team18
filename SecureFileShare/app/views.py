@@ -2,8 +2,8 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render, render_to_response, HttpResponse
 from django.template import RequestContext
-from forms import ProfileForm, UserForm
-from models import Profile
+from .forms import ProfileForm, UserForm
+from .models import Profile
 
 # Create your views here.
 

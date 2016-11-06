@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.models import User
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
-from models import Profile
+from .models import Profile
 
 class UserForm(forms.ModelForm):
 	def __init__(self, *args, **kwargs):
