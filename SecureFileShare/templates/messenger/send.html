@@ -2,9 +2,10 @@
 
 {% block content %}
 
-<form>
+<form action="/messenger/send_message" method="post">
     To: <input type="text" name="recipient">
     <textarea rows="5" cols="100"></textarea>
+    <input type="submit" value="Send Message">
 </form>
 
 {% endblock content %}
