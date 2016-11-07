@@ -1,5 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
+#from .models import ReportsTree
 
 # Create your views here.
 def index(request):
@@ -7,5 +8,5 @@ def index(request):
 
 @login_required
 def view_my_reports(request):
-	return render(request, template_name='reports/directory.html')
-	
+	#treeDisp = User.objects.all()
+	return render(request, template_name='reports/directory.html',) #context={'treeStruct': treeDisp})
