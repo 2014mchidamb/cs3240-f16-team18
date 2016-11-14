@@ -8,8 +8,7 @@ class UserForm(forms.ModelForm):
 	def __init__(self, *args, **kwargs):
 		super(UserForm, self).__init__(*args, **kwargs)
 		self.helper = FormHelper(self)
-		self.helper.form_method = 'post'
-		#self.helper.layout.append(Submit('save', 'Save'))		
+		self.helper.form_tag = False
 
 	class Meta:
 		model = User
@@ -19,9 +18,8 @@ class ProfileForm(forms.ModelForm):
 	def __init__(self, *args, **kwargs):
 		super(ProfileForm, self).__init__(*args, **kwargs)
 		self.helper = FormHelper(self)
-		self.helper.form_method = 'post'
-		self.helper.layout.append(Submit('save', 'Save'))
+		self.helper.form_tag = False
 
 	class Meta:
 		model = Profile
-		fields = ['bio', 'location']
+		fields = ['birth_date', 'location', 'bio']
