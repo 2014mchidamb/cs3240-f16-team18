@@ -1,12 +1,14 @@
 {% extends "base.html" %}
 
 {% block content %}
-
-<form action="/messenger/send_message" method="post">
-    To: <input type="text" name="recipient">
-    <textarea rows="5" cols="100" name="text"></textarea>
-    <input type="submit" value="Send Message">
-</form>
+<div class="col-md-6 offset-md-3">
+    <form action="/messenger/send_message" method="post">
+        {% csrf_token %}
+        To: <input type="text" name="recipient">
+        <textarea rows="5" cols="100" name="text"></textarea>
+        <input type="submit" value="Send Message">
+    </form>
+</div>
 
 {% endblock content %}
 
