@@ -19,8 +19,8 @@ def send_message(request):
     if(request.POST["encrypt_status"]):
         msg = Message(text=request.POST["text"], sender = request.user.username, recipient = request.POST["recipient"], encryptedFlag= True)
         # do encryption here.
-        codedMsg = enc(msg)
-        codedMsg.save()
+        #codedMsg = enc(msg)
+        #codedMsg.save()
     else:
         msg = Message(text=request.POST["text"], sender=request.user.username, recipient=request.POST["recipient"], encryptedFlag=False)
         msg.save()
