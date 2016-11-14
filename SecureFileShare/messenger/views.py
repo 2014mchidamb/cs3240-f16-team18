@@ -1,9 +1,9 @@
-from django.shortcuts import render
-from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import redirect, render, render_to_response, HttpResponse
-from django.template import RequestContext
+from django.shortcuts import render
+
 from .models import Message
+
+
 # Create your views here.
 
 @login_required
