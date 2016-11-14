@@ -12,14 +12,21 @@ class Message(models.Model):
 
 def getKey():
     # note: probably shouldn't be creating a public key every time.
+    #It should just be created once upon loading, or one key should be
+    # added to the database. Then it's retrieved.
     random_generator = Random.new().read
     key = RSA.generate(1024, random_generator)
-    public_key = key.publickey()
-    return public_key
+    return key
 
 def enc(message):
-    public_key = getKey()
-    enc_data = public_key.encrypt('abcdefgh', 32)
     message.encryptedFlag = True
+    key = getKey()
+    public_key = key.publickey()
+    enc_data = public_key.encrypt(message, 32)
     return enc_data
+
+def dec(message):
+    message.encryptedFlag = False
+    key = getKey()
+    return key.decrypt(message)
 
