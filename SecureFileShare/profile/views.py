@@ -33,3 +33,7 @@ def update_profile(request):
 			'user_form': user_form,
 			'profile_form': profile_form
 	})
+
+@login_required
+def groups(request):
+    return render(request, template_name='registration/groups.html')
