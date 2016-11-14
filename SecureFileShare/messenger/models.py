@@ -6,8 +6,8 @@ from Crypto import Random
 # Create your models here.
 class Message(models.Model):
     text = models.TextField(max_length=500, blank=True)
-    sender = models.TextField(max_length=500, blank=True)
-    recipient = models.TextField(max_length=500, blank=True)
+    sender = models.CharField(max_length=50, blank=True)
+    recipient = models.CharField(max_length=50, blank=True)
     encryptedFlag = models.BooleanField(default=False)
 
 def getKey():

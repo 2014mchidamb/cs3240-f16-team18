@@ -2,13 +2,11 @@
 
 {% block content %}
 <div class="col-md-6 offset-md-3">
-    <form action="/messenger/send_message" method="post">
-        {% csrf_token %}
-        To: <input type="text" name="recipient">
-        <textarea rows="5" cols="100" name="text"></textarea>
-        <input type="submit" value="Send Message">
+    <form action="/messenger/send" method="post">
+       {% csrf_token %}
+        {{ form }}
+        <input type="submit" value="Send" />
     </form>
-    <label><input type="checkbox" id="cbox1" value="encrypt_status"> Encrypt</label><br>
 </div>
 
 {% endblock content %}
