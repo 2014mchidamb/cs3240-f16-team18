@@ -6,8 +6,8 @@ from Crypto import Random
 # Create your models here.
 class Message(models.Model):
     text = models.TextField(max_length=500, blank=True)
-    sender = models.OneToOneField(User, on_delete=models.CASCADE)
-    recipient = models.OneToOneField(User, on_delete=models.CASCADE)
+    sender = models.TextField(max_length=500, blank=True)
+    recipient = models.TextField(max_length=500, blank=True)
     encryptedFlag = models.BooleanField(default=False)
 
 def enc(message):
