@@ -10,6 +10,9 @@ class Message(models.Model):
     recipient = models.CharField(max_length=50, blank=True)
     encryptedFlag = models.BooleanField(default=False)
 
+    def __str__(self):
+        return str(self.text)
+
 def getKey():
     # note: probably shouldn't be creating a public key every time.
     #It should just be created once upon loading, or one key should be
