@@ -16,5 +16,10 @@ def read(request):
 
 @login_required
 def send_message(request):
-    msg = Message(text=request.POST["text"], sender = request.user.username, recipient = request.POST["recipient"], encryptedFlag= False)
-    msg.save()
+    if(request.POST["encrypt_status"]):
+        #do encryption here.
+        msg = Message(text=request.POST["text"], sender = request.user.username, recipient = request.POST["recipient"], encryptedFlag= True)
+        msg.save()
+    else:
+        msg = Message(text=request.POST["text"], sender=request.user.username, recipient=request.POST["recipient"], encryptedFlag=False)
+        msg.save()
