@@ -1,5 +1,5 @@
 from django.conf.urls import url
-from app import views
+from profile import views
 
 urlpatterns = [
 	url(r'^accounts/profile/edit', views.update_profile, name='update_profile'),
