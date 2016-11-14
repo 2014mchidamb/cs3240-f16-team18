@@ -10,11 +10,16 @@ class Message(models.Model):
     recipient = models.TextField(max_length=500, blank=True)
     encryptedFlag = models.BooleanField(default=False)
 
-def enc(message):
-    #note: probably shouldn't be creating a public key every time.
+def getKey():
+    # note: probably shouldn't be creating a public key every time.
     random_generator = Random.new().read
     key = RSA.generate(1024, random_generator)
     public_key = key.publickey()
+    return public_key
+
+def enc(message):
+    public_key = getKey()
     enc_data = public_key.encrypt('abcdefgh', 32)
     message.encryptedFlag = True
+    return enc_data
 
