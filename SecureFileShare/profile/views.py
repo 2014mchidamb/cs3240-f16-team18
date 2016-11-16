@@ -22,7 +22,7 @@ def update_profile(request):
 		if user_form.is_valid() and profile_form.is_valid():
 			user_form.save()
 			profile_form.save()
-			messages.success(request, 'Your profile was successfully updated!')
+			messages.success(request, 'Your profile was updated!')
 			return redirect('/accounts/profile/')
 		else:
 			messages.error(request, 'Please correct the error below.')
@@ -33,3 +33,7 @@ def update_profile(request):
 			'user_form': user_form,
 			'profile_form': profile_form
 	})
+
+@login_required
+def groups(request):
+    return render(request, template_name='registration/groups.html')

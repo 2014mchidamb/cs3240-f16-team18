@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="col-md-6 offset-md-3">
+    <form action="/messenger/send" method="post">
+       {% csrf_token %}
+        {{ form }}
+        <input type="submit" value="Send" />
+    </form>
+</div>
+
+{% endblock content %}
+

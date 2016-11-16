@@ -3,13 +3,25 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-<div class="row">
-	<div class="col-md-6 offset-md-3">
-		<h2> First Name: {{request.user.first_name}} </h2>
-		<h2> Last Name: {{request.user.last_name}} </h2>
-		<h2> Email: {{request.user.email}} </h2>
-		<h2> Site Manager: {{request.user.profile.site_manager}} </h2>
-		<a class="btn btn-primary" href="/accounts/profile/edit/" role="button"> Edit </a>
+	<div class="row">
+		<div class="col-md-6 col-md-offset-3">
+			<div class="panel panel-default">
+				<div class="panel-heading"> User Settings </div>
+				<div class="panel-body">
+					<h3> <strong> First Name: </strong> {{ request.user.first_name }} </h3>
+					<h3> <strong> Last Name: </strong> {{ request.user.last_name }} </h3>
+					<h3> <strong> Email: </strong> {{ request.user.email }} </h3>
+				</div>
+			</div>
+			<div class="panel panel-default">
+				<div class="panel-heading"> Additional Information </div>
+				<div class="panel-body">
+					<h3> <strong> Birthday: </strong> {{ request.user.profile.birth_date }} </h3>
+					<h3> <strong> Location: </strong> {{ request.user.profile.location }} </h3>
+					<h3> <strong> Bio: </strong> {{ request.user.profile.bio }} </h3>
+				</div>
+			</div>
+			<a class="btn btn-default btn-large btn-block" href="/accounts/profile/edit/" role="button"> <h2> Edit </h2> </a>
+		</div>
 	</div>
-</div>
 {% endblock content %}
