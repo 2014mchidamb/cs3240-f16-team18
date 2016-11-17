@@ -2,8 +2,8 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render, render_to_response, HttpResponse
 from django.template import RequestContext
-from .forms import ProfileForm, UserForm
-from .models import Profile
+from .forms import ProfileForm, UserForm, GroupForm
+from .models import Group, Membership, Profile
 
 # Create your views here.
 
@@ -36,4 +36,50 @@ def update_profile(request):
 
 @login_required
 def groups(request):
-    return render(request, template_name='registration/groups.html')
+	mygroups = Group.objects.filter(members__username__exact=request.user.username)
+	return render(request, 'registration/groups.html', {
+			'mygroups': mygroups
+	})
+
+@login_required
+def create_groups(request):
+	if request.method == 'POST':
+		group_form = GroupForm(request.POST)
+		if group_form.is_valid():
+			group_form.save()
+			g = Group.objects.get(name=group_form.cleaned_data['name'])
+			m = Membership(user=request.user, group=g)
+			m.save()
+			messages.success(request, 'You successfull created a group!')
+			return redirect('/accounts/groups/')
+		else:
+			messages.error(request, 'Please correct the error below.')
+	else:
+		group_form = GroupForm()
+	return render(request, 'registration/create_groups.html', {
+		'group_form': group_form
+	})
+
+'''
+@login_required
+def create_groups(request):
+	if request.method == 'POST':
+		group_form = GroupForm(request.POST)
+		group_profile_form = GroupProfileForm(request.POST)
+		if group_form.is_valid() and group_profile_form.is_valid():
+			group_form.save()
+			g = Group.objects.get(name=group_form.cleaned_data['name'])
+			group_profile_form.save()
+			g.user_set.add(request.user)
+			messages.success(request, 'You successfully created a group!')
+			return redirect('/accounts/groups/')
+		else:
+			messages.error(request, 'Please correct the error below.')
+	else:
+		group_form = GroupForm()
+		group_profile_form = GroupProfileForm()
+	return render(request, 'registration/create_groups.html', {
+			'group_form': group_form,
+			'group_profile_form': group_profile_form,
+    })
+'''
