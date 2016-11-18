@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.models import User
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
-from .models import Profile
+from .models import Group, Profile
 
 class UserForm(forms.ModelForm):
 	def __init__(self, *args, **kwargs):
@@ -23,3 +23,14 @@ class ProfileForm(forms.ModelForm):
 	class Meta:
 		model = Profile
 		fields = ['birth_date', 'location', 'bio']
+
+class GroupForm(forms.ModelForm):
+	def __init__(self, *args, **kwargs):
+		super(GroupForm, self).__init__(*args, **kwargs)
+		self.helper = FormHelper(self)
+		self.helper.form_tag = False
+
+	class Meta:
+		model = Group
+		fields = ['name', 'desc']
+
