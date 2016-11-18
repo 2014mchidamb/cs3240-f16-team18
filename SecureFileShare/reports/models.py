@@ -11,7 +11,6 @@ class ReportsTree(models.Model):
 	owner = models.TextField();
 	treeStruct = models.TextField()
 
-@receiver(post_save, sender=User)
-def create_user_tree(sender, instance, created, **kwargs):
-	if created:
-		ReportsTree.objects.create(user=instance)
+#def create_user_tree(sender, instance, created, **kwargs):
+#	if created:
+#		ReportsTree.objects.create(user=instance)
