@@ -69,24 +69,13 @@ def file_list(request):
 @csrf_exempt 
 def file_upload(request):
 	requested = request.POST
-	gotten = requested.post('name')
+	gotten = requested['name']
+	cont   = requested['cont']
+	print(gotten,cont)
+	newFile = Files(owner = request.user.username, name = gotten, fileCont = cont)
+	newFile.save()
 	
-	usersFiles = Files.objects.filter(owner__iexact=request.user.username)
-	
-	print("uname", request.user.username)
-	
-	nameMatch = None
-	for item in usersFiles:
-		if item.name == gotten:
-			nameMatch = item
-			break
-	
-	if nameMatch is None:
-		return render(request, template_name='reports/filemake.html', context={"fileData": ""})
-	
-	content_load = nameMatch.fileCont
-	
-	return render(request, template_name='reports/filemake.html', context={"fileData": content_load})
+	return render(request, template_name='reports/filemake.html', context={"fileData": "success"})
 
 def displayTree(dir):
 	return dispTreeHelp(dir, 0);
