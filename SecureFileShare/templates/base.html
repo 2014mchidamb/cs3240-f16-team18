@@ -48,27 +48,39 @@
             </div>
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-                <ul class="nav navbar-nav">
+                <!--<ul class="nav navbar-nav">-->
 					{% if user.is_authenticated %}
-					<li>
-						<a href="/accounts/profile">Profile</a>
-					</li>
-					<li>
-						<a href="/accounts/logout">Logout</a>
-					</li>
-                    <li>
-                        <a href="/messenger/send">Send PM</a>
-					</li>
-                    <li>
-                        <a href="/messenger/read">View PMs</a>
-                    </li>
-					<li>
-                        <a href="/accounts/reports">My Reports</a>
-                    </li>
-					<li>
-						<a href="/accounts/groups">My Groups</a>
+					<ul class="nav navbar-nav navbar-right">
+					<li class="dropdown">
+						<a href="#" class="dropdown-toggle" data-toggle="dropdown">
+							<span class="glyphicon glyphicon-user"></span>
+							<strong> {{ user.username }} </strong>
+							<span class="glyphicon glyphicon-chevron-down"></span>
+						</a>
+						<ul class="dropdown-menu">
+					
+							<li>
+								<a href="/accounts/profile">Profile</a>
+							</li>
+							<li>
+								<a href="/accounts/logout">Logout</a>
+							</li>
+                    		<li>
+                        		<a href="/messenger/send">Send PM</a>
+							</li>
+                    		<li>
+                        		<a href="/messenger/read">View PMs</a>
+                    		</li>
+							<li>
+                        		<a href="/accounts/reports">My Reports</a>
+                    		</li>
+							<li>
+								<a href="/accounts/groups">My Groups</a>
+							</li>
+						</ul>
 					</li>
 					{% else %}
+					<ul class="nav navbar-nav">
                     <li>
                         <a href="/">About</a>
                     </li>
