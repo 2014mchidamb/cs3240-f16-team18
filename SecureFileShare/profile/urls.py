@@ -6,5 +6,6 @@ urlpatterns = [
 	url(r'^accounts/groups', views.groups, name='groups'),
 	url(r'^accounts/profile/edit', views.update_profile, name='update_profile'),
 	url(r'^accounts/profile', views.profile, name='profile'),
+	url(r'^groups/(?P<group_name>.+)', views.view_group, name='view_group'),
 	url(r'^$', views.index, name='index'),
 ]

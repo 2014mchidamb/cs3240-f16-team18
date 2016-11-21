@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% load crispy_forms_tags %}
+
+{% block content %}
+    <div class="row">
+        <h1 class="text-center"> <strong> {{ report.name }} </strong> </h1>
+		<div class="col-md-6 col-md-offset-3">	
+			<div class="panel panel-default">
+				<div class="panel-heading"> Time Created </div>
+				<div class="panel-body"> {{ report.tstamp }} </div>
+			</div>
+		</div>
+		<div class="col-md-6 col-md-offset-3">	
+			<div class="panel panel-default">
+				<div class="panel-heading"> Short Description </div>
+				<div class="panel-body"> {{ report.short }} </div>
+			</div>
+		</div>
+		<div class="col-md-6 col-md-offset-3">	
+			<div class="panel panel-default">
+				<div class="panel-heading"> Summary </div>
+				<div class="panel-body"> {{ report.summary }} </div>
+			</div>
+		</div>
+    </div>
+{% endblock content %}

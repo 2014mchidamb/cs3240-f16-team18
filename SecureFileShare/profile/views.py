@@ -60,26 +60,10 @@ def create_groups(request):
 		'group_form': group_form
 	})
 
-'''
 @login_required
-def create_groups(request):
-	if request.method == 'POST':
-		group_form = GroupForm(request.POST)
-		group_profile_form = GroupProfileForm(request.POST)
-		if group_form.is_valid() and group_profile_form.is_valid():
-			group_form.save()
-			g = Group.objects.get(name=group_form.cleaned_data['name'])
-			group_profile_form.save()
-			g.user_set.add(request.user)
-			messages.success(request, 'You successfully created a group!')
-			return redirect('/accounts/groups/')
-		else:
-			messages.error(request, 'Please correct the error below.')
-	else:
-		group_form = GroupForm()
-		group_profile_form = GroupProfileForm()
-	return render(request, 'registration/create_groups.html', {
-			'group_form': group_form,
-			'group_profile_form': group_profile_form,
-    })
-'''
+def view_group(request, group_name):
+	group = Group.objects.get(name=group_name)
+	return render(request, 'registration/group_profile.html', {
+		'group': group,
+		'members': group.members.all()
+	})
