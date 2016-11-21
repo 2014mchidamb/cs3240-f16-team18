@@ -25,7 +25,7 @@ SECRET_KEY = '-(it-a46*9+waky-bm3o1)nbhotn&g9@_h_@v98=*c)l&3mver'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['pure-hollows-64295.herokuapp.com']
 
 # User registration
 REGISTRATION_OPEN = True
@@ -81,7 +81,7 @@ WSGI_APPLICATION = 'SecureFileShare.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'securefiledb',
         'USER': 'team18',
         'PASSWORD': 'team18',
@@ -89,6 +89,11 @@ DATABASES = {
         'PORT': '5432',
     }
 }
+
+if os.environ.get('DATABASE_URL'):
+	import dj_database_url
+	db_from_env = dj_database_url.config(conn_max_age=500)
+	DATABASES['default'].update(db_from_env)
 
 
 # Password validation
@@ -128,5 +133,5 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
 
 STATIC_URL = '/static/'
-
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 CRISPY_TEMPLATE_PACK = 'bootstrap3'
