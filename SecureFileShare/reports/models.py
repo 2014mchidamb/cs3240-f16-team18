@@ -8,8 +8,14 @@ from django.db import models
 # Create your models here.
 class ReportsTree(models.Model):
 	#owner = models.OneToOneField(Profile, on_delete=models.CASCADE)
-	owner = models.TextField();
+	owner = models.TextField()
 	treeStruct = models.TextField()
+
+class Files(models.Model):
+	#owner = models.OneToOneField(Profile, on_delete=models.CASCADE)
+	owner    = models.TextField()
+	name     = models.TextField()
+	fileCont = models.TextField()
 
 #def create_user_tree(sender, instance, created, **kwargs):
 #	if created:
