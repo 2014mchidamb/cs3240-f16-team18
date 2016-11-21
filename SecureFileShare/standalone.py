@@ -27,10 +27,13 @@ while (True):
 		#upload a file
 		dl_link = "http://localhost:8000/file_upload"
 		needed  = input("Type in name of file: ")
-		print("Loading file...")
-		file = requests.post(dl_link, )
-		print(file.content)
-		print("to implement")
+		
+		with open(needed, 'rb') as in_file:
+			upload_file = in_file.read()
+		
+		print("Uploading file...")
+		file = requests.post(dl_link, data={"name":needed, "cont":upload_file})
+		#print(file.content)
 	else:
 		print("Invalid command. Goodbye.")
 		exit()
