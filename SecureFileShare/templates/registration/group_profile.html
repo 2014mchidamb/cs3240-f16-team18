@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% load crispy_forms_tags %}
+
+{% block content %}
+    <div class="row">
+        <h1 class="text-center"> <strong> {{ group.name }} </strong> </h1>
+		<div class="col-md-6 col-md-offset-3">
+			<div class="panel panel-default">
+				<div class="panel-heading"> Group Description </div>
+				<div class="panel-body"> {{ group.desc }} </div>
+			</div>
+		</div>
+		<div class="col-md-6 col-md-offset-3">
+			<div class="panel panel-default">
+				<div class="panel-heading"> Group Members </div>
+				<div class="panel-body">
+					{% for member in members %}
+						<h2 class="text-center"> {{ member.username }} </h2>
+					{% endfor %}
+				</div>
+			</div>
+		</div>
+    </div>
+{% endblock content %}
