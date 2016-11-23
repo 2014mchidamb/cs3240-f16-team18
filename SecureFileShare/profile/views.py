@@ -63,7 +63,24 @@ def create_groups(request):
 @login_required
 def view_group(request, group_name):
 	group = Group.objects.get(name=group_name)
+	cant_view = group.priv and not group.members.filter(username=request.user.username)
+	if request.POST.get('leave'):
+		m = Membership(user=request.user, group=group)
+		m.delete()
+		return redirect('/groups/'+group_name+'/')
+	elif request.POST.get('join'):
+		m = Membership(user=request.user, group=group)
+		m.save()
+		return redirect('/groups/'+group_name+'/')
 	return render(request, 'registration/group_profile.html', {
 		'group': group,
-		'members': group.members.all()
+		'members': group.members.all(),
+		'cant_view': cant_view
+	})
+
+@login_required
+def public_groups(request):
+	pubgroups = Group.objects.filter(priv=False)
+	return render(request, 'registration/public_groups.html', {
+		'pubgroups': pubgroups
 	})

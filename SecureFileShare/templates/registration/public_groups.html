@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% load crispy_forms_tags %}
+
+{% block content %}
+    <div class="row">
+        <h1 class="text-center"> <strong> Public Groups </strong> </h1>
+		<div class="col-md-6 col-md-offset-3">
+			<div class="panel panel-default">
+				{% for group in pubgroups %}
+					<a href="/groups/{{ group.name }}"> <h2 class="text-center"> {{ group.name }} </h2> </a>
+				{% endfor %}
+			</div>
+		</div>
+    </div>
+{% endblock content %}
