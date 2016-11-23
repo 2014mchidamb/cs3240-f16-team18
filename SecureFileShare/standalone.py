@@ -1,6 +1,9 @@
 import requests
 from html.parser import HTMLParser
+from Crypto.PublicKey import RSA
+from Crypto import Random
 
+#main
 base_url = "http://localhost:8000/"
 login_url = base_url + "accounts/login/"
 
@@ -25,8 +28,18 @@ class CSRFGetter(HTMLParser):
 csrf_getter = CSRFGetter(data)
 csrf_getter.feed(response.text)
 
+# logn result
 print(requests.post(login_url, cookies=response.cookies, data=data))
 
+#If successful login...
+
+#If this user has logged in before, I don't need to generate a new key.
+random_generator = Random.new().read
+key = RSA.generate(1024, random_generator)
+#then store key to file on disk.
+file = open("privateKey.pem", "wb")
+file.write(key.exportKey('PEM'))
+file.close()
 
 while (True):
 	print("\nWhat would you like to do?")
@@ -38,27 +51,29 @@ while (True):
 		#Lists all the files
 		print("Files List:")
 		dl_link = base_url + "file_list"
-		file = requests.get(dl_link)
-		print(file.text)
+		response = requests.get(dl_link)
+		print(response.text)
 
 	elif cmd == "2":
 		#load the requested item.
 		dl_link = base_url + "file_get"
 		needed  = input("Type in name of file: ")
 		print("Loading file...")
-		file = requests.get(dl_link+'?name='+needed)
-		print(file.content)
+		response = requests.get(dl_link + '?name=' + needed)
+		print(response.content)
+
 	elif cmd == "3":
-		#upload a file
+		#upload a response
 		dl_link = base_url + "file_upload"
 		needed  = input("Type in name of file: ")
-
+		
 		with open(needed, 'rb') as in_file:
 			upload_file = in_file.read()
-
+		
 		print("Uploading file...")
-		file = requests.post(dl_link, data={"name":needed, "cont":upload_file})
-		#print(file.content)
+		response = requests.post(dl_link, data={"name":needed, "cont":upload_file})
+		#print(response.content)
+
 	else:
 		print("Invalid command. Goodbye.")
 		exit()
