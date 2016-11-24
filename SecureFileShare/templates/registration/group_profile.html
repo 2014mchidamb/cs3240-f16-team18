@@ -24,6 +24,16 @@
 				</div>
 			</div>
 		</div>
+		<div class="col-md-4 col-md-offset-4 text-center">
+			<form method="post">
+			{% csrf_token %}
+			{% if is_member %}
+				<button type="submit" class="btn btn-default btn-large btn-block" name="leave"> <h2> <strong> Leave Group <strong> </h2> </button>
+			{% else %}
+				<button type="submit" class="btn btn-default btn-large btn-block" name="join"> <h2> <strong> Join Group <strong> </h2> </button>
+			{% endif %}
+			</form>
+		</div>
 		{% endif %}
     </div>
 {% endblock content %}
