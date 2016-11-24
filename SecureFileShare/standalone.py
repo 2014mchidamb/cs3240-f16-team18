@@ -2,6 +2,7 @@ import requests
 from html.parser import HTMLParser
 from Crypto.PublicKey import RSA
 from Crypto import Random
+import os.path
 
 #main
 base_url = "http://localhost:8000/"
@@ -34,12 +35,19 @@ print(requests.post(login_url, cookies=response.cookies, data=data))
 #If successful login...
 
 #If this user has logged in before, I don't need to generate a new key.
-random_generator = Random.new().read
-key = RSA.generate(1024, random_generator)
-#then store key to file on disk.
-file = open("privateKey.pem", "wb")
-file.write(key.exportKey('PEM'))
-file.close()
+#Check based on privateKey.pem on computer.
+if(os.path.isfile('privateKey.pem')):
+	#open the file, save the key
+	file = open('privateKey.pem', 'r')
+	#Note: this is currently the entire key with some text.
+	#print(file.read())
+else:
+	random_generator = Random.new().read
+	key = RSA.generate(1024, random_generator)
+	#then store key to file on disk.
+	file = open("privateKey.pem", "wb")
+	file.write(key.exportKey('PEM'))
+	file.close()
 
 while (True):
 	print("\nWhat would you like to do?")
