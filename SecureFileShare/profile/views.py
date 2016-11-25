@@ -1,8 +1,9 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.shortcuts import redirect, render, render_to_response, HttpResponse
 from django.template import RequestContext
-from .forms import ProfileForm, UserForm, GroupForm
+from .forms import ProfileForm, UserForm, GroupForm, AddUserForm
 from .models import Group, Membership, Profile
 
 # Create your views here.
@@ -74,11 +75,22 @@ def view_group(request, group_name):
 		m = Membership(user=request.user, group=group)
 		m.save()
 		return redirect('/public/groups')
+	if 'add_user' in request.POST:
+		add_form = AddUserForm(request.POST)
+		if add_form.is_valid():
+			user_to_add = User.objects.filter(username=add_form.cleaned_data['username']).first()
+			if user_to_add:
+				m = Membership(user=user_to_add, group=group)
+				m.save()
+			return redirect('/groups/'+group_name)
+	else:
+		add_form = AddUserForm()
 	return render(request, 'registration/group_profile.html', {
 		'group': group,
 		'members': group.members.all(),
 		'is_member': is_member,
-		'cant_view': cant_view
+		'cant_view': cant_view,
+		'add_form': add_form
 	})
 
 @login_required
