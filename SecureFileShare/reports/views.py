@@ -97,7 +97,7 @@ def create_reports(request):
 def view_report(request, report_name):
 	report = Report.objects.get(name=report_name)
 	is_owner = report.owners.filter(username=request.user.username)
-	cant_view = not report.viewers.filter(username=request.user.username)
+	cant_view = report.priv and not report.viewers.filter(username=request.user.username)
 	if 'add_user_report' in request.POST:
 		add_user_form = AddUserReportForm(request.POST)
 		if add_user_form.is_valid():
@@ -126,4 +126,11 @@ def view_report(request, report_name):
 		'viewers': report.viewers.all(),
 		'add_user_form': add_user_form,
 		'add_group_form': add_group_form
+	})
+
+@login_required
+def public_reports(request):
+	pubreps = Report.objects.filter(priv=False)
+	return render(request, 'reports/public_reports.html', {
+		'pubreps': pubreps
 	})

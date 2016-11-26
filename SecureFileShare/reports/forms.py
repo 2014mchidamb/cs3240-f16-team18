@@ -11,7 +11,7 @@ class ReportForm(forms.ModelForm):
 
 	class Meta:
 		model = Report
-		fields = ['name', 'short', 'desc']
+		fields = ['name', 'short', 'desc', 'priv']
 
 class FileForm(forms.Form):
 	file_field = forms.FileField(
