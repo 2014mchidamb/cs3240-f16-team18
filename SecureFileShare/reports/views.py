@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from .models import Files
 from django.shortcuts import redirect, render, render_to_response, HttpResponse
 from django.template import RequestContext
-from .forms import ReportForm
+from .forms import ReportForm, FileForm
 from .models import Report, Ownership, Viewership
 
 from django.views.decorators.csrf import csrf_exempt
@@ -70,21 +70,26 @@ def file_upload(request):
 def create_reports(request):
 	if request.method == 'POST':
 		report_form = ReportForm(request.POST)
-		if report_form.is_valid():
+		file_form = FileForm(request.POST)
+		if report_form.is_valid() and file_form.is_valid():
 			report_form.save()
 			rep = Report.objects.get(name=report_form.cleaned_data['name'])
 			own = Ownership(user=request.user, report=rep)
 			vw = Viewership(user=request.user, report=rep)
 			own.save()
 			vw.save()
+			for f in request.FILES.getlist('file_field'):
+				print f
 			messages.success(request, 'You successfully created a report!')
 			return redirect('/accounts/reports/')
 		else:
 			messages.error(request, 'Please correct the error below.')
 	else:
 		report_form = ReportForm()
+		file_form = FileForm()
 	return render(request, 'reports/create_reports.html', {
-		'report_form': report_form
+		'report_form': report_form,
+		'file_form': file_form
 	})
 
 @login_required

@@ -13,3 +13,13 @@ class ReportForm(forms.ModelForm):
 		model = Report
 		fields = ['name', 'short', 'desc']
 
+class FileForm(forms.Form):
+	file_field = forms.FileField(
+		label = "File",
+		widget = forms.ClearableFileInput(attrs={'multiple': True}),
+		required = False,
+	)
+	def __init__(self, *args, **kwargs):
+		super(FileForm, self).__init__(*args, **kwargs)
+		self.helper = FormHelper(self)
+		self.helper.form_tag = False
