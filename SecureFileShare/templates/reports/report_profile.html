@@ -4,6 +4,9 @@
 
 {% block content %}
     <div class="row">
+        {% if cant_view %}
+        	<h1 class="text-center"> <strong> You do not have access to this report. </strong> </h1>
+        {% else %}
         <h1 class="text-center"> <strong> {{ report.name }} </strong> </h1>
 		<div class="col-md-6 col-md-offset-3">	
 			<div class="panel panel-default">
@@ -20,8 +23,43 @@
 		<div class="col-md-6 col-md-offset-3">	
 			<div class="panel panel-default">
 				<div class="panel-heading"> Summary </div>
-				<div class="panel-body"> {{ report.summary }} </div>
+				<div class="panel-body"> {{ report.desc }} </div>
 			</div>
 		</div>
+        <div class="col-md-6 col-md-offset-3">
+            <div class="panel panel-default">
+                <div class="panel-heading"> Users With Access </div>
+                <div class="panel-body">
+                    {% for viewer in viewers %}
+                        <h2 class="text-center"> {{ viewer.username }} </h2>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% if is_owner %}
+        <div class="col-md-6 col-md-offset-3">
+            <form method="post">
+            {% csrf_token %}
+            <div class="panel panel-default">
+                <div class="panel-heading"> Grant User Access </div>
+                <div class="panel-body"> {% crispy add_user_form %}
+                <div class="text-center">
+                <button type="submit" class="btn btn-default" name="add_user_report"> Add </button>
+                </div>
+                </div>
+			</div>
+            <div class="panel panel-default">
+                <div class="panel-heading"> Grant Group Access </div>
+                <div class="panel-body"> {% crispy add_group_form %}
+                <div class="text-center">
+                <button type="submit" class="btn btn-default" name="add_group_report"> Add </button>
+                </div>
+                </div>
+            </div>
+            </form>
+        </div>
+        {% endif %}
+
+		{% endif %}
     </div>
 {% endblock content %}

@@ -23,3 +23,25 @@ class FileForm(forms.Form):
 		super(FileForm, self).__init__(*args, **kwargs)
 		self.helper = FormHelper(self)
 		self.helper.form_tag = False
+
+class AddUserReportForm(forms.Form):
+	username = forms.CharField(
+		label = "Enter Username",
+		max_length = 50,
+		required = False,
+	)
+	def __init__(self, *args, **kwargs):
+		super(AddUserReportForm, self).__init__(*args, **kwargs)
+		self.helper = FormHelper(self)
+		self.helper.form_tag = False
+
+class AddGroupReportForm(forms.Form):
+	groupname = forms.CharField(
+		label = "Enter Group Name",
+		max_length = 50,
+		required = False,
+	)
+	def __init__(self, *args, **kwargs):
+		super(AddGroupReportForm, self).__init__(*args, **kwargs)
+		self.helper = FormHelper(self)
+		self.helper.form_tag = False
