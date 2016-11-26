@@ -16,6 +16,7 @@ class Report(models.Model):
 	tstamp = models.DateTimeField(auto_now=True)
 	short = models.CharField(verbose_name="Short Description", max_length=50, blank=True)
 	desc = models.TextField(verbose_name="Summary", max_length=500, blank=True)
+	priv = models.BooleanField(verbose_name="private", default=False)
 	owners = models.ManyToManyField(User, related_name="owners", through="Ownership")
 	viewers = models.ManyToManyField(User, related_name="viewers", through="Viewership")
 

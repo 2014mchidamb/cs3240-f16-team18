@@ -32,5 +32,16 @@ class GroupForm(forms.ModelForm):
 
 	class Meta:
 		model = Group
-		fields = ['name', 'desc']
+		fields = ['name', 'desc', 'priv']
+
+class AddUserForm(forms.Form):
+	username = forms.CharField(
+		label = "Enter Username",
+		max_length = 50,
+		required = False,
+	)
+	def __init__(self, *args, **kwargs):
+		super(AddUserForm, self).__init__(*args, **kwargs)
+		self.helper = FormHelper(self)
+		self.helper.form_tag = False
 

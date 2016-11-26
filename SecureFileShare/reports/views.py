@@ -1,9 +1,10 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from .models import Files
 from django.shortcuts import redirect, render, render_to_response, HttpResponse
 from django.template import RequestContext
-from .forms import ReportForm
+from .forms import ReportForm, FileForm, AddUserReportForm, AddGroupReportForm
 from .models import Report, Ownership, Viewership
 
 from django.views.decorators.csrf import csrf_exempt
@@ -70,28 +71,66 @@ def file_upload(request):
 def create_reports(request):
 	if request.method == 'POST':
 		report_form = ReportForm(request.POST)
-		if report_form.is_valid():
+		file_form = FileForm(request.POST)
+		if report_form.is_valid() and file_form.is_valid():
 			report_form.save()
 			rep = Report.objects.get(name=report_form.cleaned_data['name'])
 			own = Ownership(user=request.user, report=rep)
 			vw = Viewership(user=request.user, report=rep)
 			own.save()
 			vw.save()
+			for f in request.FILES.getlist('file_field'):
+				print f
 			messages.success(request, 'You successfully created a report!')
 			return redirect('/accounts/reports/')
 		else:
 			messages.error(request, 'Please correct the error below.')
 	else:
 		report_form = ReportForm()
+		file_form = FileForm()
 	return render(request, 'reports/create_reports.html', {
-		'report_form': report_form
+		'report_form': report_form,
+		'file_form': file_form
 	})
 
 @login_required
 def view_report(request, report_name):
 	report = Report.objects.get(name=report_name)
+	is_owner = report.owners.filter(username=request.user.username)
+	cant_view = report.priv and not report.viewers.filter(username=request.user.username)
+	if 'add_user_report' in request.POST:
+		add_user_form = AddUserReportForm(request.POST)
+		if add_user_form.is_valid():
+			user_to_add = User.objects.filter(username=add_user_form.cleaned_data['username']).first()
+			if user_to_add:
+				v = Viewership(user=user_to_add, report=report)
+				v.save()
+			return redirect('/reports/'+report_name)
+	else:
+		add_user_form = AddUserReportForm()
+	if 'add_group_report' in request.POST:
+		add_group_form = AddGroupReportForm(request.POST)
+		if add_group_form.is_valid():
+			group_to_add = Group.objects.filter(name=add_group_form.cleaned_data['groupname']).first()
+			if group_to_add:
+				for member in group_to_add.members.all():
+					v = Viewership(user=member, report=report)
+					v.save()
+			return redirect('/reports/'+report_name)
+	else:
+		add_group_form = AddGroupReportForm()
 	return render(request, 'reports/report_profile.html', {
 		'report': report,
-		'owners': report.owners.all(),
-		'viewers': report.viewers.all()
+		'is_owner': is_owner,
+		'cant_view': cant_view,
+		'viewers': report.viewers.all(),
+		'add_user_form': add_user_form,
+		'add_group_form': add_group_form
+	})
+
+@login_required
+def public_reports(request):
+	pubreps = Report.objects.filter(priv=False)
+	return render(request, 'reports/public_reports.html', {
+		'pubreps': pubreps
 	})
