@@ -26,6 +26,16 @@
 				<div class="panel-body"> {{ report.desc }} </div>
 			</div>
 		</div>
+		<div class="col-md-6 col-md-offset-3">
+			<div class="panel panel-default">
+				<div class="panel-heading"> Report Files </div>
+				<div class="panel-body"> 
+					{% for file in files %}
+						<h2 class="text-center"> {{ file.rfile }} </h2>
+					{% endfor %}
+				</div>
+			</div>
+		</div>
         <div class="col-md-6 col-md-offset-3">
             <div class="panel panel-default">
                 <div class="panel-heading"> Users With Access </div>

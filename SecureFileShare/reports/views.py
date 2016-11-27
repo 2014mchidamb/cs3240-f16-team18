@@ -5,7 +5,7 @@ from .models import Files
 from django.shortcuts import redirect, render, render_to_response, HttpResponse
 from django.template import RequestContext
 from .forms import ReportForm, FileForm, AddUserReportForm, AddGroupReportForm
-from .models import Report, Ownership, Viewership
+from .models import Report, ReportFile, Fileship, Ownership, Viewership
 
 from django.views.decorators.csrf import csrf_exempt
 
@@ -79,7 +79,10 @@ def create_reports(request):
 			own.save()
 			vw.save()
 			for f in request.FILES.getlist('files'):
-				print f
+				rfile = ReportFile(rfile=f)
+				rfile.save()
+				fship = Fileship(report=rep, repfile=rfile)
+				fship.save()
 			messages.success(request, 'You successfully created a report!')
 			return redirect('/accounts/reports/')
 		else:
@@ -124,6 +127,7 @@ def view_report(request, report_name):
 		'is_owner': is_owner,
 		'cant_view': cant_view,
 		'private': report.priv,
+		'files': ReportFile.objects.filter(reports__name__exact=report_name),
 		'viewers': report.viewers.all(),
 		'add_user_form': add_user_form,
 		'add_group_form': add_group_form

@@ -21,7 +21,7 @@ class Report(models.Model):
 	viewers = models.ManyToManyField(User, related_name="viewers", through="Viewership")
 
 class ReportFile(models.Model):
-	rfile = models.FileField()
+	rfile = models.FileField(blank=True)
 	reports = models.ManyToManyField(Report, through="Fileship")
 
 class Fileship(models.Model):
