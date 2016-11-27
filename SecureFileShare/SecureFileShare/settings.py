@@ -42,7 +42,8 @@ INSTALLED_APPS = [
     'profile',
 	'crispy_forms',
     'messenger',
-	'reports'
+	'reports',
+	'search'
 ]
 
 MIDDLEWARE = [
