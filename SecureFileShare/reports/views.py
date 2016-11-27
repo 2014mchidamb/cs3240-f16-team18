@@ -71,26 +71,23 @@ def file_upload(request):
 def create_reports(request):
 	if request.method == 'POST':
 		report_form = ReportForm(request.POST)
-		file_form = FileForm(request.POST)
-		if report_form.is_valid() and file_form.is_valid():
+		if report_form.is_valid():
 			report_form.save()
 			rep = Report.objects.get(name=report_form.cleaned_data['name'])
 			own = Ownership(user=request.user, report=rep)
 			vw = Viewership(user=request.user, report=rep)
 			own.save()
 			vw.save()
-			for f in request.FILES.getlist('file_field'):
+			for f in request.FILES.getlist('files'):
 				print f
 			messages.success(request, 'You successfully created a report!')
 			return redirect('/accounts/reports/')
 		else:
 			messages.error(request, 'Please correct the error below.')
 	else:
-		report_form = ReportForm()
-		file_form = FileForm()
+		report_form = ReportForm()	
 	return render(request, 'reports/create_reports.html', {
-		'report_form': report_form,
-		'file_form': file_form
+		'report_form': report_form
 	})
 
 @login_required
@@ -119,10 +116,14 @@ def view_report(request, report_name):
 			return redirect('/reports/'+report_name)
 	else:
 		add_group_form = AddGroupReportForm()
+	if 'delete' in request.POST:
+		report.delete()
+		return redirect('/accounts/reports')
 	return render(request, 'reports/report_profile.html', {
 		'report': report,
 		'is_owner': is_owner,
 		'cant_view': cant_view,
+		'private': report.priv,
 		'viewers': report.viewers.all(),
 		'add_user_form': add_user_form,
 		'add_group_form': add_group_form

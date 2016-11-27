@@ -15,7 +15,7 @@ class ReportForm(forms.ModelForm):
 
 class FileForm(forms.Form):
 	file_field = forms.FileField(
-		label = "File",
+		label = "Add File",
 		widget = forms.ClearableFileInput(attrs={'multiple': True}),
 		required = False,
 	)
