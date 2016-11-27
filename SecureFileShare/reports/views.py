@@ -80,7 +80,7 @@ def create_reports(request):
 			own.save()
 			vw.save()
 			for f in request.FILES.getlist('file_field'):
-				print f
+				print (f)
 			messages.success(request, 'You successfully created a report!')
 			return redirect('/accounts/reports/')
 		else:
