@@ -29,7 +29,7 @@ class CSRFGetter(HTMLParser):
 csrf_getter = CSRFGetter(data)
 csrf_getter.feed(response.text)
 
-# logn result
+# login result
 print(requests.post(login_url, cookies=response.cookies, data=data))
 
 #If successful login...
@@ -55,6 +55,7 @@ while (True):
 	print("1. List your files and details in report.")
 	print("2. Download a file.")
 	print("3. Upload a file.")
+	print("4. Read a private message.")
 	print("9. Exit.")
 	cmd = input("Enter a number corresponding to a command: ")
 	if cmd == "0":
@@ -101,7 +102,13 @@ while (True):
 		print("Uploading file...")
 		response = requests.post(dl_link, data={"rep_name":needed}, files=upl)
 		print(response.content)
-
+	elif cmd == "4":
+		dl_link = base_url + "read"
+		#probably not right
+		needed = user
+		print("Loading message...")
+		response = requests.get(dl_link + '?name=' + needed)
+		print(response.content)
 	elif cmd == "9":
 		print("Goodbye.")
 		exit()

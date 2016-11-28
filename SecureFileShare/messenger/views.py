@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
-
+from django.contrib import messages
 from messenger.forms import SendForm
 from .models import Message
 
@@ -19,6 +19,9 @@ def send(request):
             # ...
             # redirect to a new URL:
             form.save()
+            messages.success(request, 'Your message was sent!')
+        else:
+            messages.error(request, 'Please correct the error below.')
 
     # if a GET (or any other method) we'll create a blank form
     else:

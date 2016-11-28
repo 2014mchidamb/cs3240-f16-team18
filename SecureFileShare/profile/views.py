@@ -67,7 +67,7 @@ def view_group(request, group_name):
 	is_member = group.members.filter(username=request.user.username)
 	cant_view = group.priv and not is_member
 	if 'leave' in request.POST:
-		print ("Made it here")
+		print("Made it here")
 		m = Membership.objects.get(user=request.user, group=group)
 		m.delete()
 		return redirect('/public/groups')
