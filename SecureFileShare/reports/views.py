@@ -18,39 +18,64 @@ def reports(request):
 			'myreports': myreports
 	})
 
+@csrf_exempt 
 def file_get(request):
-	requested = request.GET
-	gotten = requested.get('name')
+	requested = request.POST
+	user = requested['user']
+	report_name = requested["report"]
+	file_name = requested["file"]
 	
-	usersFiles = Files.objects.filter(owner__iexact=request.user.username)
+	report = Report.objects.get(name=report_name)
+	cant_view = report.priv and not report.viewers.filter(username=request.user.username)
+	if cant_view:
+		return render(request, template_name='reports/filemake.html', context={"fileData": "You do not have permissions"})
 	
-	print("uname", request.user.username)
-	
-	nameMatch = None
-	for item in usersFiles:
-		if item.name == gotten:
-			nameMatch = item
-			break
-	
-	if nameMatch is None:
-		return render(request, template_name='reports/filemake.html', context={"fileData": ""})
-	
-	content_load = nameMatch.fileCont
-	
-	return render(request, template_name='reports/filemake.html', context={"fileData": content_load})
+		
+	user_files = ReportFile.objects.filter(reports__name__exact=report_name)
+	list_names = []
+	for fil in user_files:
+		if (fil.rfile.name == file_name):
+			return render(request, template_name='reports/filemake.html', context={"fileData": fil.rfile.open()})
 
+	return render(request, template_name='reports/filemake.html', context={"fileData": "No file found within requested report."})
+
+@csrf_exempt 
 def file_list(request):
-	usersFiles = Files.objects.filter(owner__iexact=request.user.username)
-	print(usersFiles)
+	requested = request.POST
+	user_name   = requested['user']
+	report_name = requested['report']
+	
+	if report_name == "ALL`REP":
+		myreports = Report.objects.filter(viewers__username__exact=user_name)
+		list_names = []
+		for reps in myreports:
+			list_names.append(reps.name+": "+reps.short)
+		
+		dispVal = (str(list_names)).replace("'","")
+		return render(request, template_name='reports/filemake.html', context={"fileData": dispVal})
+		
+	usersFiles = ReportFile.objects.filter(reports__name__exact=report_name)
 	
 	if len(usersFiles) == 0:
-		newFile = Files(owner = request.user.username, name = "ReadMe.txt", fileCont = "Welcome to SecureFileShare.  Try uploading more files here.")
-		newFile.save()
-		return file_list(request)
+		return render(request, template_name='reports/filemake.html', context={"fileData": "No such report"})
+	
+	report = Report.objects.get(name=report_name)
+	
+	cant_view = report.priv and not report.viewers.filter(username=request.user.username)
+	
+	if cant_view:
+		return render(request, template_name='reports/filemake.html', context = {"fileData": "You do not have permisions!"})
+	
+	print(usersFiles)
+	
+	#if len(usersFiles) == 0:
+		#newFile = Files(owner = request.user.username, name = "ReadMe.txt", fileCont = "Welcome to SecureFileShare.  Try uploading more files here.")
+		#newFile.save()
+		#return file_list(request)
 	
 	list_names = []
 	for files in usersFiles:
-		list_names.append(files.name)
+		list_names.append(files.rfile.name)
 		
 	dispVal = (str(list_names)).replace("'","")
 	

@@ -10,8 +10,8 @@ login_url = base_url + "accounts/login/"
 
 print("Welcome to the Standalone App!")
 
-user = input("Username: ")
-password = input("Password: ")
+user = "nke5ka"# input("Username: ")
+password = "passcode"#input("Password: ")
 
 response = requests.get(login_url)
 data = {"username": user, "password": password}
@@ -51,23 +51,32 @@ else:
 
 while (True):
 	print("\nWhat would you like to do?")
-	print("1. List your files.")
+	print("0. List your reports.")
+	print("1. List your files and details in report.")
 	print("2. Download a file.")
 	print("3. Upload a file.")
+	print("9. Exit.")
 	cmd = input("Enter a number corresponding to a command: ")
-	if cmd == "1":
-		#Lists all the files
+	if cmd == "0":
+		print("Reports List:")
+		dl_link = base_url + "file_list"
+		response = requests.post(dl_link, data={"user": user, "report": "ALL`REP"})
+		print(response.text.replace(",","\n"))
+	
+	elif cmd == "1":
+		rep = input("What is the name of your report? ")
 		print("Files List:")
 		dl_link = base_url + "file_list"
-		response = requests.get(dl_link)
+		response = requests.post(dl_link, data={"user": user, "report": rep})
 		print(response.text)
 
 	elif cmd == "2":
 		#load the requested item.
 		dl_link = base_url + "file_get"
-		needed  = input("Type in name of file: ")
+		needed  = input("Type in name of report: ")
+		needed2 = input("Type in name of file: ")
 		print("Loading file...")
-		response = requests.get(dl_link + '?name=' + needed)
+		response = requests.post(dl_link, data={"user": user, "report": needed, "file": needed2})
 		print(response.content)
 
 	elif cmd == "3":
@@ -82,6 +91,8 @@ while (True):
 		response = requests.post(dl_link, data={"name":needed, "cont":upload_file})
 		#print(response.content)
 
-	else:
-		print("Invalid command. Goodbye.")
+	elif cmd == "9":
+		print("Goodbye.")
 		exit()
+	else:
+		print("Invalid command.")
