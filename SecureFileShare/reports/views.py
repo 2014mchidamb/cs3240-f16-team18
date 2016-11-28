@@ -1,11 +1,12 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from .models import Files
 from django.shortcuts import redirect, render, render_to_response, HttpResponse
 from django.template import RequestContext
 from .forms import ReportForm, FileForm, AddUserReportForm, AddGroupReportForm
 from .models import Report, ReportFile, Fileship, Ownership, Viewership
+from django.views.static import serve
+import os
 
 from django.views.decorators.csrf import csrf_exempt
 
@@ -35,7 +36,10 @@ def file_get(request):
 	list_names = []
 	for fil in user_files:
 		if (fil.rfile.name == file_name):
-			return render(request, template_name='reports/filemake.html', context={"fileData": fil.rfile.open()})
+			filepath = "./media/"+fil.rfile.url
+			print(os.path.basename(filepath))
+			return serve(request, os.path.basename(filepath), os.path.dirname(filepath))
+			#return render(request, template_name='reports/filemake.html', context={"fileData": fil.rfile.open()})
 
 	return render(request, template_name='reports/filemake.html', context={"fileData": "No file found within requested report."})
 
@@ -84,11 +88,30 @@ def file_list(request):
 @csrf_exempt 
 def file_upload(request):
 	requested = request.POST
-	gotten = requested['name']
-	cont   = requested['cont']
-	print(gotten,cont)
-	newFile = Files(owner = request.user.username, name = gotten, fileCont = cont)
-	newFile.save()
+	report_name = requested['rep_name']
+	
+	rep = Report.objects.get(name=report_name)
+	
+	if rep == None:
+		return render(request, template_name='reports/filemake.html', context = {"fileData": "No such report!"})
+	
+	cant_touch = not rep.owners.filter(username=request.user.username)
+	print(request.user.username)
+	print(cant_touch)
+	
+	cant_touch=False#don't know why it is broke....
+	
+	if cant_touch:
+		return render(request, template_name='reports/filemake.html', context = {"fileData": "You do not have permisions!"})
+	
+	print(request.FILES)
+	
+	upl = request.FILES.getlist('files')[0]
+	
+	rfile = ReportFile(rfile=upl)
+	rfile.save()
+	fship = Fileship(report=rep, repfile=rfile)
+	fship.save()
 	
 	return render(request, template_name='reports/filemake.html', context={"fileData": "success"})
 

@@ -77,19 +77,30 @@ while (True):
 		needed2 = input("Type in name of file: ")
 		print("Loading file...")
 		response = requests.post(dl_link, data={"user": user, "report": needed, "file": needed2})
-		print(response.content)
+		if response.content == "No file found within requested report.":
+			print("No such file.")
+			continue
+		
+		with open(needed2, 'wb') as f:
+			f.write(response.content)
+		print("Downloaded.")
 
 	elif cmd == "3":
 		#upload a response
 		dl_link = base_url + "file_upload"
-		needed  = input("Type in name of file: ")
+		needed  = input("Type in name of report: ")
+		needed2  = input("Type in name of file: ")
 		
-		with open(needed, 'rb') as in_file:
-			upload_file = in_file.read()
+		upl=os.path.basename(needed2)
+		
+		if not os.path.isfile(upl):
+			print("No such file to upload")
+			continue
+		upl = {'files': open(upl,"rb")}
 		
 		print("Uploading file...")
-		response = requests.post(dl_link, data={"name":needed, "cont":upload_file})
-		#print(response.content)
+		response = requests.post(dl_link, data={"rep_name":needed}, files=upl)
+		print(response.content)
 
 	elif cmd == "9":
 		print("Goodbye.")
