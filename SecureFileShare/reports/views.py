@@ -28,9 +28,12 @@ def file_get(request):
 	
 	report = Report.objects.get(name=report_name)
 	cant_view = report.priv and not report.viewers.filter(username=request.user.username)
+	
+	cant_view = False#need auth works
+	
 	if cant_view:
 		return render(request, template_name='reports/filemake.html', context={"fileData": "You do not have permissions"})
-	
+		
 		
 	user_files = ReportFile.objects.filter(reports__name__exact=report_name)
 	list_names = []
@@ -66,6 +69,8 @@ def file_list(request):
 	report = Report.objects.get(name=report_name)
 	
 	cant_view = report.priv and not report.viewers.filter(username=request.user.username)
+	
+	cant_view = False #whyyy
 	
 	if cant_view:
 		return render(request, template_name='reports/filemake.html', context = {"fileData": "You do not have permisions!"})

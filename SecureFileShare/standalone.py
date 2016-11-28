@@ -4,14 +4,109 @@ from Crypto.PublicKey import RSA
 from Crypto import Random
 import os.path
 
+
+
+#######Crypto Stuff Here
+from Crypto.PublicKey import RSA
+from Crypto import Random
+from Crypto.Cipher import DES
+from Crypto.Hash import SHA256
+def encrypt_file(file_name, sym_key):
+    """Encrypts file with sym_key"""
+    if not isinstance(sym_key, type(b'')):
+        print("Key must be in bytes")
+        return False
+    sym_8 = (SHA256.new(sym_key)).digest()[0:8]
+    des = DES.new(sym_8, DES.MODE_ECB)
+    try:
+        with open(file_name, 'rb') as in_file:
+            out_name = file_name + ".enc"
+            with open(out_name, 'wb') as out_file:
+                next_chunk = in_file.read(8)
+                while True:
+                    chunk = next_chunk
+                    next_chunk = in_file.read(8)
+                    if next_chunk:
+                        chunk = des.encrypt(chunk)
+                        out_file.write(chunk)
+                    else:
+                        to_fill = 8-len(chunk)
+                        if to_fill is 0:
+                            chunk = des.encrypt(chunk)
+                            out_file.write(chunk)
+                            chunk = des.encrypt(b'10000000')
+                            out_file.write(chunk)
+                        else:
+                            # Pad with 1 then 0s
+                            chunk += b'1'
+                            for i in range(to_fill-1):
+                                chunk += b'0'
+                            chunk = des.encrypt(chunk)
+                            out_file.write(chunk)
+                            chunk = des.encrypt(b'00000000')
+                            out_file.write(chunk)
+                        break
+    except FileNotFoundError:
+        print("Files could not be opened.  Check your spelling.")
+        return False
+    return True
+
+
+def decrypt_file(file_name, sym_key):
+    """Decrypts file using sym_key"""
+    if not isinstance(sym_key, type(b'')):
+        print("Key must be in bytes")
+        return False
+    try:
+        sym_8 = (SHA256.new(sym_key)).digest()[0:8]
+        des = DES.new(sym_8, DES.MODE_ECB)
+        if len(file_name) < 5 or file_name[-4:] != ".enc":
+            print("Not an encoded file")
+            return False
+        with open(file_name, 'rb') as in_file:
+            out_name = file_name[:-4]
+            with open(out_name, 'wb') as out_file:
+                next_chunk = in_file.read(8)
+                next_next_chunk = in_file.read(8)
+                while True:
+                    chunk = next_chunk
+                    next_chunk = next_next_chunk
+                    next_next_chunk = in_file.read(8)
+                    if next_next_chunk:
+                        chunk = des.decrypt(chunk)
+                        out_file.write(chunk)
+                        #print(chunk)
+                    else:
+                        # Last chunk is empty, second to last is
+                        # sentinel and is dropped
+                        indicator_chunk = des.decrypt(next_chunk)
+                        chunk = des.decrypt(chunk)
+                        if indicator_chunk != b'10000000':
+                            end_one = chunk.rfind(b"1")
+                            chunk = chunk[:end_one]
+                        out_file.write(chunk)
+                        #print(chunk)
+                        break
+    except FileNotFoundError:
+        print("Files could not be opened.  Check your spelling.")
+        return False
+    return True
+
+
+
+
+
+
+
+
 #main
 base_url = "http://localhost:8000/"
 login_url = base_url + "accounts/login/"
 
 print("Welcome to the Standalone App!")
 
-user = "nke5ka"# input("Username: ")
-password = "passcode"#input("Password: ")
+user = input("Username: ")
+password = input("Password: ")
 
 response = requests.get(login_url)
 data = {"username": user, "password": password}
@@ -85,6 +180,9 @@ while (True):
 		with open(needed2, 'wb') as f:
 			f.write(response.content)
 		print("Downloaded.")
+		if ".enc" in needed2:
+			dec_it = input("This file is encrypted.  Do you want to unencrypt? (y to do so)")
+			if dec_it == "y": decrypt_file(needed2, str.encode(password))
 
 	elif cmd == "3":
 		#upload a response
@@ -97,6 +195,11 @@ while (True):
 		if not os.path.isfile(upl):
 			print("No such file to upload")
 			continue
+		
+		encrypt_file(needed2, str.encode(password))
+		
+		upl=os.path.basename(needed2+".enc")
+		
 		upl = {'files': open(upl,"rb")}
 		
 		print("Uploading file...")
