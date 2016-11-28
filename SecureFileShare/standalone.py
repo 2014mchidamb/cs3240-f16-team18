@@ -54,6 +54,7 @@ while (True):
 	print("1. List your files.")
 	print("2. Download a file.")
 	print("3. Upload a file.")
+	print("4. Read a private message.")
 	cmd = input("Enter a number corresponding to a command: ")
 	if cmd == "1":
 		#Lists all the files
@@ -81,6 +82,14 @@ while (True):
 		print("Uploading file...")
 		response = requests.post(dl_link, data={"name":needed, "cont":upload_file})
 		#print(response.content)
+
+	elif cmd == "4":
+		dl_link = base_url + "read"
+		#probably not right
+		needed = user
+		print("Loading message...")
+		response = requests.get(dl_link + '?name=' + needed)
+		print(response.content)
 
 	else:
 		print("Invalid command. Goodbye.")
