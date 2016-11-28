@@ -29,7 +29,7 @@ class CSRFGetter(HTMLParser):
 csrf_getter = CSRFGetter(data)
 csrf_getter.feed(response.text)
 
-# logn result
+# login result
 print(requests.post(login_url, cookies=response.cookies, data=data))
 
 #If successful login...
