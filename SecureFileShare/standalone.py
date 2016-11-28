@@ -4,6 +4,101 @@ from Crypto.PublicKey import RSA
 from Crypto import Random
 import os.path
 
+
+
+#######Crypto Stuff Here
+from Crypto.PublicKey import RSA
+from Crypto import Random
+from Crypto.Cipher import DES
+from Crypto.Hash import SHA256
+def encrypt_file(file_name, sym_key):
+    """Encrypts file with sym_key"""
+    if not isinstance(sym_key, type(b'')):
+        print("Key must be in bytes")
+        return False
+    sym_8 = (SHA256.new(sym_key)).digest()[0:8]
+    des = DES.new(sym_8, DES.MODE_ECB)
+    try:
+        with open(file_name, 'rb') as in_file:
+            out_name = file_name + ".enc"
+            with open(out_name, 'wb') as out_file:
+                next_chunk = in_file.read(8)
+                while True:
+                    chunk = next_chunk
+                    next_chunk = in_file.read(8)
+                    if next_chunk:
+                        chunk = des.encrypt(chunk)
+                        out_file.write(chunk)
+                    else:
+                        to_fill = 8-len(chunk)
+                        if to_fill is 0:
+                            chunk = des.encrypt(chunk)
+                            out_file.write(chunk)
+                            chunk = des.encrypt(b'10000000')
+                            out_file.write(chunk)
+                        else:
+                            # Pad with 1 then 0s
+                            chunk += b'1'
+                            for i in range(to_fill-1):
+                                chunk += b'0'
+                            chunk = des.encrypt(chunk)
+                            out_file.write(chunk)
+                            chunk = des.encrypt(b'00000000')
+                            out_file.write(chunk)
+                        break
+    except FileNotFoundError:
+        print("Files could not be opened.  Check your spelling.")
+        return False
+    return True
+
+
+def decrypt_file(file_name, sym_key):
+    """Decrypts file using sym_key"""
+    if not isinstance(sym_key, type(b'')):
+        print("Key must be in bytes")
+        return False
+    try:
+        sym_8 = (SHA256.new(sym_key)).digest()[0:8]
+        des = DES.new(sym_8, DES.MODE_ECB)
+        if len(file_name) < 5 or file_name[-4:] != ".enc":
+            print("Not an encoded file")
+            return False
+        with open(file_name, 'rb') as in_file:
+            out_name = file_name[:-4]
+            with open(out_name, 'wb') as out_file:
+                next_chunk = in_file.read(8)
+                next_next_chunk = in_file.read(8)
+                while True:
+                    chunk = next_chunk
+                    next_chunk = next_next_chunk
+                    next_next_chunk = in_file.read(8)
+                    if next_next_chunk:
+                        chunk = des.decrypt(chunk)
+                        out_file.write(chunk)
+                        #print(chunk)
+                    else:
+                        # Last chunk is empty, second to last is
+                        # sentinel and is dropped
+                        indicator_chunk = des.decrypt(next_chunk)
+                        chunk = des.decrypt(chunk)
+                        if indicator_chunk != b'10000000':
+                            end_one = chunk.rfind(b"1")
+                            chunk = chunk[:end_one]
+                        out_file.write(chunk)
+                        #print(chunk)
+                        break
+    except FileNotFoundError:
+        print("Files could not be opened.  Check your spelling.")
+        return False
+    return True
+
+
+
+
+
+
+
+
 #main
 base_url = "http://localhost:8000/"
 login_url = base_url + "accounts/login/"
@@ -51,38 +146,65 @@ else:
 
 while (True):
 	print("\nWhat would you like to do?")
-	print("1. List your files.")
+	print("0. List your reports.")
+	print("1. List your files and details in report.")
 	print("2. Download a file.")
 	print("3. Upload a file.")
 	print("4. Read a private message.")
+	print("9. Exit.")
 	cmd = input("Enter a number corresponding to a command: ")
-	if cmd == "1":
-		#Lists all the files
+	if cmd == "0":
+		print("Reports List:")
+		dl_link = base_url + "file_list"
+		response = requests.post(dl_link, data={"user": user, "report": "ALL`REP"})
+		print(response.text.replace(",","\n"))
+	
+	elif cmd == "1":
+		rep = input("What is the name of your report? ")
 		print("Files List:")
 		dl_link = base_url + "file_list"
-		response = requests.get(dl_link)
+		response = requests.post(dl_link, data={"user": user, "report": rep})
 		print(response.text)
 
 	elif cmd == "2":
 		#load the requested item.
 		dl_link = base_url + "file_get"
-		needed  = input("Type in name of file: ")
+		needed  = input("Type in name of report: ")
+		needed2 = input("Type in name of file: ")
 		print("Loading file...")
-		response = requests.get(dl_link + '?name=' + needed)
-		print(response.content)
+		response = requests.post(dl_link, data={"user": user, "report": needed, "file": needed2})
+		if response.content == "No file found within requested report.":
+			print("No such file.")
+			continue
+		
+		with open(needed2, 'wb') as f:
+			f.write(response.content)
+		print("Downloaded.")
+		if ".enc" in needed2:
+			dec_it = input("This file is encrypted.  Do you want to unencrypt? (y to do so)")
+			if dec_it == "y": decrypt_file(needed2, str.encode(password))
 
 	elif cmd == "3":
 		#upload a response
 		dl_link = base_url + "file_upload"
-		needed  = input("Type in name of file: ")
+		needed  = input("Type in name of report: ")
+		needed2  = input("Type in name of file: ")
 		
-		with open(needed, 'rb') as in_file:
-			upload_file = in_file.read()
+		upl=os.path.basename(needed2)
+		
+		if not os.path.isfile(upl):
+			print("No such file to upload")
+			continue
+		
+		encrypt_file(needed2, str.encode(password))
+		
+		upl=os.path.basename(needed2+".enc")
+		
+		upl = {'files': open(upl,"rb")}
 		
 		print("Uploading file...")
-		response = requests.post(dl_link, data={"name":needed, "cont":upload_file})
-		#print(response.content)
-
+		response = requests.post(dl_link, data={"rep_name":needed}, files=upl)
+		print(response.content)
 	elif cmd == "4":
 		dl_link = base_url + "read"
 		#probably not right
@@ -90,7 +212,8 @@ while (True):
 		print("Loading message...")
 		response = requests.get(dl_link + '?name=' + needed)
 		print(response.content)
-
-	else:
-		print("Invalid command. Goodbye.")
+	elif cmd == "9":
+		print("Goodbye.")
 		exit()
+	else:
+		print("Invalid command.")

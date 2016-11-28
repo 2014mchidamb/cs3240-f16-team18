@@ -5,12 +5,6 @@ from django.db import models
 
 # Create your models here.
 
-class Files(models.Model):
-	#owner = models.OneToOneField(Profile, on_delete=models.CASCADE)
-	owner    = models.TextField()
-	name     = models.TextField()
-	fileCont = models.TextField()
-
 class Report(models.Model):
 	name = models.CharField(max_length=30, blank=True)
 	tstamp = models.DateTimeField(auto_now=True)
