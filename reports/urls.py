@@ -8,6 +8,7 @@ urlpatterns = [
 	url(r'file_upload', views.file_upload, name='file_upload'),
 	url(r'^accounts/reports/create', views.create_reports, name='create_reports'),
 	url(r'^accounts/reports', views.reports, name='reports'),
+	url(r'^reports/(?P<report_name>.+)/edit', views.edit_report, name='edit_report'),
 	url(r'^reports/(?P<report_name>.+)', views.view_report, name='view_report'),
 	url(r'^public/reports', views.public_reports, name='public_reports')
 ]

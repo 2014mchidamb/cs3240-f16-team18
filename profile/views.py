@@ -51,7 +51,7 @@ def create_groups(request):
 			g = Group.objects.get(name=group_form.cleaned_data['name'])
 			m = Membership(user=request.user, group=g)
 			m.save()
-			messages.success(request, 'You successfull created a group!')
+			messages.success(request, 'You successfully created a group!')
 			return redirect('/accounts/groups/')
 		else:
 			messages.error(request, 'Please correct the error below.')
@@ -60,6 +60,24 @@ def create_groups(request):
 	return render(request, 'registration/create_groups.html', {
 		'group_form': group_form
 	})
+
+@login_required
+def edit_group(request, group_name):
+	group = Group.objects.get(name=group_name)
+	is_member = group.members.filter(username=request.user.username)
+	if request.method == 'POST':
+		group_form = GroupForm(request.POST, instance=group)
+		if group_form.is_valid():
+			group_form.save()
+			return redirect('/accounts/groups/')
+		else:
+			messages.error(request, 'Please correct the error below.')
+	else:
+		group_form = GroupForm(instance=group)
+	return render(request, 'registration/edit_groups.html', {
+		'group_form': group_form,
+		'cant_edit': not is_member
+	})		
 
 @login_required
 def view_group(request, group_name):
