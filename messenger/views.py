@@ -18,7 +18,9 @@ def send(request):
             # process the data in form.cleaned_data as required
             # ...
             # redirect to a new URL:
-            form.save()
+            model = form.save(commit=False)
+            model.sender = request.user.username
+            model.save()
             messages.success(request, 'Your message was sent!')
         else:
             messages.error(request, 'Please correct the error below.')

@@ -43,11 +43,16 @@
 			<form method="post">
 			{% csrf_token %}
 			{% if is_member %}
-				<button type="submit" class="btn btn-default btn-large btn-block" name="leave"> <h2> <strong> Leave Group <strong> </h2> </button>
+				<button type="submit" class="btn btn-default btn-large btn-block" name="leave"> <h2> <strong> Leave Group </strong> </h2> </button>
 			{% else %}
-				<button type="submit" class="btn btn-default btn-large btn-block" name="join"> <h2> <strong> Join Group <strong> </h2> </button>
+				<button type="submit" class="btn btn-default btn-large btn-block" name="join"> <h2> <strong> Join Group </strong> </h2> </button>
 			{% endif %}
 			</form>
+		</div>
+		<div class="col-md-4 col-md-offset-4 text-center">
+		{% if is_member %}
+			<a class="btn btn-default btn-large btn-block" href="/groups/{{ group.name }}/edit" role="button"> <h2> <strong> Edit Group </strong> </h2> </a>
+		{% endif %}
 		</div>
 		{% endif %}
     </div>

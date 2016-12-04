@@ -25,7 +25,7 @@ SECRET_KEY = '-(it-a46*9+waky-bm3o1)nbhotn&g9@_h_@v98=*c)l&3mver'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['pure-hollows-64295.herokuapp.com', 'mighty-plateau-91963.herokuapp.com', '127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['mighty-fjord-54317.herokuapp.com', '127.0.0.1', 'localhost']
 
 # User registration
 REGISTRATION_OPEN = True

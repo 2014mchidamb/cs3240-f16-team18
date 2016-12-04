@@ -148,6 +148,30 @@ def create_reports(request):
 	})
 
 @login_required
+def edit_report(request, report_name):
+	report = Report.objects.get(name=report_name)
+	is_owner = report.owners.filter(username=request.user.username)
+	if request.method == 'POST':
+		report_form = ReportForm(request.POST, instance=report)
+		if report_form.is_valid():
+			report_form.save()
+
+			for f in request.FILES.getlist('files'):
+				rfile = ReportFile(rfile=f)
+				rfile.save()
+				fship = Fileship(report=report, repfile=rfile)
+				fship.save()
+			return redirect('/accounts/reports/')
+		else:
+			messages.error(request, 'Please correct the error below.')
+	else:
+		report_form = ReportForm(instance=report)
+	return render(request, 'reports/edit_reports.html', {
+		'report_form': report_form,
+		'cant_edit': not is_owner
+	})
+
+@login_required
 def view_report(request, report_name):
 	report = Report.objects.get(name=report_name)
 	is_owner = report.owners.filter(username=request.user.username)
