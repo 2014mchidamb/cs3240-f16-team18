@@ -2,9 +2,12 @@
 
 {% load crispy_forms_tags %}
 
+{% load search_tags %}
+
 {% block content %}
     <div class="row">
         <h1 class="text-center"> <strong> My Messages </strong> </h1>
+		<h2 class="text-center"> {% search messages sender text %} </h2>
 		<div class="col-md-6 col-md-offset-3">
 			{% for message in messages %}
 				<div class="panel panel-default">
