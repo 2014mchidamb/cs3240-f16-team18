@@ -21,10 +21,11 @@
 					</div>
 					<div class="text-center">
 						<form method="post">
+							{% csrf_token %}
 							{% if message.encrypted %}
-								<button class="btn btn-default" type="submit" name="decrypt"+{{ message.id }}> Decrypt </button>
+								<button class="btn btn-default" type="submit" name="decrypt{{ message.id }}"> Decrypt </button>
 							{% endif %}
-							<button class="btn btn-default" type="submit" name="read"+{{ message.id }}> Mark Read </button>
+							<button class="btn btn-default" type="submit" name="read{{ message.id }}"> Mark Read </button>
 						</form>
 					</div>
 				</div>
@@ -41,7 +42,8 @@
 					<div class="panel panel-body"> {{ message.text }} </div>
 					<div class="text-center">
 						<form method="post">
-							<button class="btn btn-default" type="submit" name="unread"> Mark Unread  </button>
+							{% csrf_token %}
+							<button class="btn btn-default" type="submit" name="unread{{ message.id }}"> Mark Unread  </button>
 						</form>
 					</div>
 				</div>

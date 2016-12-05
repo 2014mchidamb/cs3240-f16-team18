@@ -15,6 +15,7 @@ class Profile(models.Model):
 	active = models.BooleanField(default=True)
 	priv_key = models.TextField(max_length=1000, blank=True)
 	pub_key = models.TextField(max_length=1000, blank=True)
+	unread = models.IntegerField(default=0)
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
