@@ -9,6 +9,8 @@ from .models import Message
 
 @login_required
 def send(request):
+	if not request.user.profile.active:
+		return render(request, template_name='suspended.html')
     # if this is a POST request we need to process the form data
     if request.method == 'POST':
         # create a form instance and populate it with data from the request:
@@ -33,6 +35,8 @@ def send(request):
 
 @login_required
 def read(request):
+	if not request.user.profile.active:
+		return render(request, template_name='suspended.html')
     return render(request, template_name='messenger/read_messages.html', context={"messages": Message.objects.filter(recipient__iexact=request.user.username)})
 
 @login_required
