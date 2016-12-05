@@ -5,6 +5,7 @@ from Crypto import Random
 import os.path
 import getpass
 import hashlib
+import base64
 
 
 
@@ -219,7 +220,7 @@ while (True):
 			continue
 		
 		hashy = get_hash(upl)
-		print("Hash of uploaded file is:",hashy)
+		print("Hash of uploaded file is:",base64.b64encode(hashy))
 		
 		encrypt_file(needed2, str.encode(password))
 		
@@ -228,7 +229,7 @@ while (True):
 		upl = {'files': open(upl,"rb")}
 		
 		print("Uploading file...")
-		response = requests.post(dl_link, data={"rep_name":needed, "hashy": hashy}, files=upl)
+		response = requests.post(dl_link, data={"rep_name":needed, "hashy": base64.b64encode(hashy)}, files=upl)
 		print(response.content)
 	elif cmd == "4":
 		dl_link = base_url + "file_verify"
@@ -242,7 +243,7 @@ while (True):
 			print("No such file.")
 			continue
 		print(response.content, hashy)
-		if response.content == hashy:
+		if base64.b64decode(response.content) == hashy:
 			print("Files match.")
 		else:
 			print("Files were altered during transit.")
