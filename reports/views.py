@@ -17,6 +17,8 @@ def reports(request):
 	if not request.user.profile.active:
 		return render(request, template_name='suspended.html')
 	myreports = Report.objects.filter(viewers__username__exact=request.user.username)
+	if request.user.profile.site_manager:
+		myreports = Report.objects.all()
 	return render(request, 'reports/reports.html', {
 			'myreports': myreports
 	})
@@ -157,6 +159,8 @@ def edit_report(request, report_name):
 		return render(request, template_name='suspended.html')
 	report = Report.objects.get(name=report_name)
 	is_owner = report.owners.filter(username=request.user.username)
+	if request.user.profile.site_manager:
+		is_owner = True	
 	if request.method == 'POST':
 		report_form = ReportForm(request.POST, instance=report)
 		if report_form.is_valid():
@@ -184,6 +188,9 @@ def view_report(request, report_name):
 	report = Report.objects.get(name=report_name)
 	is_owner = report.owners.filter(username=request.user.username)
 	cant_view = report.priv and not report.viewers.filter(username=request.user.username)
+	if request.user.profile.site_manager:
+		is_owner = True
+		cant_view = False
 	if 'add_user_report' in request.POST:
 		add_user_form = AddUserReportForm(request.POST)
 		if add_user_form.is_valid():
