@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% load crispy_forms_tags %}
+
+{% block content %}
+	<div class="row">
+		<div class="col-md-6 col-md-offset-3">
+			<div class="panel panel-default">
+				<div class="panel-heading"> User Settings </div>
+				<div class="panel-body">
+					<h3> <strong> First Name: </strong> {{ user.first_name }} </h3>
+					<h3> <strong> Last Name: </strong> {{ user.last_name }} </h3>
+					<h3> <strong> Email: </strong> {{ user.email }} </h3>
+				</div>
+			</div>
+			<div class="panel panel-default">
+				<div class="panel-heading"> Additional Information </div>
+				<div class="panel-body">
+					<h3> <strong> Birthday: </strong> {{ user.profile.birth_date }} </h3>
+					<h3> <strong> Location: </strong> {{ user.profile.location }} </h3>
+					<h3> <strong> Bio: </strong> {{ user.profile.bio }} </h3>
+				</div>
+			</div>
+			{% if is_sm %}
+				<form method="post">
+				{% csrf_token %}
+				{% if user.profile.active %}
+					<button class="btn btn-default btn-large btn-block" type="submit" name="suspend"> <h2> Suspend </h2> </button>
+				{% else %}
+					<button class="btn btn-default btn-large btn-block" type="submit" name="activate"> <h2> Activate </h2> </button>
+				{% endif %}
+				</form>
+			{% endif %}
+		</div>
+	</div>
+{% endblock content %}
