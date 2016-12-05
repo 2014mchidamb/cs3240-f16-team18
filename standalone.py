@@ -97,7 +97,7 @@ def decrypt_file(file_name, sym_key):
 
 def get_hash(file_name):
 	try:
-		hashy = hashlib.md5()
+		hashy = hashlib.sha512()
 		with open(file_name, 'rb') as in_file:
 			hashy.update(in_file.read())
 		return hashy.digest()
