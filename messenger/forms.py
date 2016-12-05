@@ -11,4 +11,4 @@ class SendForm(forms.ModelForm):
 
 	class Meta:
 		model = Message
-		fields = ['recipient', 'text', 'encryptedFlag']
+		fields = ['recipient', 'text', 'encrypted']

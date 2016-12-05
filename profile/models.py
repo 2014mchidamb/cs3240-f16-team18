@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+from Crypto.PublicKey import RSA
 from django.contrib.auth.models import User 
 from django.db import models
 from django.db.models.signals import post_save
@@ -12,11 +13,16 @@ class Profile(models.Model):
 	birth_date = models.DateField(null=True, blank=True)
 	site_manager = models.BooleanField(default=False)
 	active = models.BooleanField(default=True)
+	priv_key = models.TextField(max_length=1000, blank=True)
+	pub_key = models.TextField(max_length=1000, blank=True)
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
 	if created:
-		Profile.objects.create(user=instance)
+		profile=Profile.objects.create(user=instance)
+		key = RSA.generate(1024)
+		profile.pub_key = key.publickey().exportKey()
+		profile.priv_key = key.exportKey()
 
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
