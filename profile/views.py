@@ -13,10 +13,32 @@ def index(request):
 
 @login_required
 def profile(request):
+	if not request.user.profile.active:
+		return render(request, template_name='suspended.html')
 	return render(request, template_name='registration/profile.html')
 
 @login_required
+def view_profile(request, username):
+	if not request.user.profile.active:
+		return render(request, template_name='suspended.html')
+	user = User.objects.get(username=username)
+	if 'suspend' in request.POST:
+		user.profile.active = False
+		user.save()
+		return redirect('/public/users/')
+	if 'activate' in request.POST:
+		user.profile.active = True
+		user.save()
+		return redirect('/public/users/')
+	return render(request, 'registration/view_profile.html', {
+		'user': user,
+		'is_sm': request.user.profile.site_manager
+	})
+
+@login_required
 def update_profile(request):
+	if not request.user.profile.active:
+		return render(request, template_name='suspended.html')
 	if request.method == 'POST':
 		user_form = UserForm(request.POST, instance=request.user)
 		profile_form = ProfileForm(request.POST, instance=request.user.profile)
@@ -37,13 +59,19 @@ def update_profile(request):
 
 @login_required
 def groups(request):
+	if not request.user.profile.active:
+		return render(request, template_name='suspended.html')
 	mygroups = Group.objects.filter(members__username__exact=request.user.username)
+	if request.user.profile.site_manager:
+		mygroups = Group.objects.all()
 	return render(request, 'registration/groups.html', {
 			'mygroups': mygroups
 	})
 
 @login_required
 def create_groups(request):
+	if not request.user.profile.active:
+		return render(request, template_name='suspended.html')
 	if request.method == 'POST':
 		group_form = GroupForm(request.POST)
 		if group_form.is_valid():
@@ -63,8 +91,12 @@ def create_groups(request):
 
 @login_required
 def edit_group(request, group_name):
+	if not request.user.profile.active:
+		return render(request, template_name='suspended.html')
 	group = Group.objects.get(name=group_name)
 	is_member = group.members.filter(username=request.user.username)
+	if request.user.profile.site_manager:
+		is_member = True
 	if request.method == 'POST':
 		group_form = GroupForm(request.POST, instance=group)
 		if group_form.is_valid():
@@ -81,9 +113,14 @@ def edit_group(request, group_name):
 
 @login_required
 def view_group(request, group_name):
+	if not request.user.profile.active:
+		return render(request, template_name='suspended.html')
 	group = Group.objects.get(name=group_name)
 	is_member = group.members.filter(username=request.user.username)
 	cant_view = group.priv and not is_member
+	if request.user.profile.site_manager:
+		is_member = True
+		cant_view = False
 	if 'leave' in request.POST:
 		print("Made it here")
 		m = Membership.objects.get(user=request.user, group=group)
@@ -113,7 +150,18 @@ def view_group(request, group_name):
 
 @login_required
 def public_groups(request):
+	if not request.user.profile.active:
+		return render(request, template_name='suspended.html')
 	pubgroups = Group.objects.filter(priv=False)
 	return render(request, 'registration/public_groups.html', {
 		'pubgroups': pubgroups
+	})
+
+@login_required
+def public_users(request):
+	if not request.user.profile.active:
+		return render(request, template_name='suspended.html')
+	pubusers = User.objects.all()
+	return render(request, 'registration/public_users.html', {
+		'pubusers': pubusers
 	})

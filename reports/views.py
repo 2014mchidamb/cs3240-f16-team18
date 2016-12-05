@@ -14,6 +14,8 @@ from django.views.decorators.csrf import csrf_exempt
 
 @login_required
 def reports(request):
+	if not request.user.profile.active:
+		return render(request, template_name='suspended.html')
 	myreports = Report.objects.filter(viewers__username__exact=request.user.username)
 	return render(request, 'reports/reports.html', {
 			'myreports': myreports
@@ -122,6 +124,8 @@ def file_upload(request):
 
 @login_required
 def create_reports(request):
+	if not request.user.profile.active:
+		return render(request, template_name='suspended.html')
 	if request.method == 'POST':
 		report_form = ReportForm(request.POST)
 		if report_form.is_valid():
@@ -149,6 +153,8 @@ def create_reports(request):
 
 @login_required
 def edit_report(request, report_name):
+	if not request.user.profile.active:
+		return render(request, template_name='suspended.html')
 	report = Report.objects.get(name=report_name)
 	is_owner = report.owners.filter(username=request.user.username)
 	if request.method == 'POST':
@@ -173,6 +179,8 @@ def edit_report(request, report_name):
 
 @login_required
 def view_report(request, report_name):
+	if not request.user.profile.active:
+		return render(request, template_name='suspended.html')
 	report = Report.objects.get(name=report_name)
 	is_owner = report.owners.filter(username=request.user.username)
 	cant_view = report.priv and not report.viewers.filter(username=request.user.username)
@@ -213,6 +221,8 @@ def view_report(request, report_name):
 
 @login_required
 def public_reports(request):
+	if not request.user.profile.active:
+		return render(request, template_name='suspended.html')
 	pubreps = Report.objects.filter(priv=False)
 	return render(request, 'reports/public_reports.html', {
 		'pubreps': pubreps

@@ -8,6 +8,8 @@ urlpatterns = [
 	url(r'^accounts/profile', views.profile, name='profile'),
 	url(r'^groups/(?P<group_name>.+)/edit', views.edit_group, name='edit_group'),
 	url(r'^groups/(?P<group_name>.+)', views.view_group, name='view_group'),
+	url(r'^profiles/(?P<username>.+)', views.view_profile, name='view_profile'),
 	url(r'^public/groups', views.public_groups, name='public_groups'),
+	url(r'^public/users', views.public_users, name='public_users'),
 	url(r'^$', views.index, name='index'),
 ]
