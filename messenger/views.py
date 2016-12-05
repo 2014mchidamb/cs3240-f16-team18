@@ -1,7 +1,7 @@
 from Crypto.PublicKey import RSA
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.contrib import messages
 from messenger.forms import SendForm
 from .models import Message
@@ -27,10 +27,9 @@ def send(request):
 			if model.encrypted:
 				recipient = User.objects.get(username=model.recipient)
 				pub_key_obj = RSA.importKey(recipient.profile.pub_key)
-				print model.text
-				emsg = pub_key_obj.encrypt(str.encode(str(model.text)), 'x')[0]
-				model.text = emsg
+				model.etext = pub_key_obj.encrypt(model.text.encode('latin-1'), 'x')[0]
 			model.save()
+			return redirect('/messenger/read/')
 			messages.success(request, 'Your message was sent!')
 		else:
 			messages.error(request, 'Please correct the error below.')
