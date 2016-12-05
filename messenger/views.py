@@ -12,32 +12,32 @@ def send(request):
 	if not request.user.profile.active:
 		return render(request, template_name='suspended.html')
     # if this is a POST request we need to process the form data
-    if request.method == 'POST':
+	if request.method == 'POST':
         # create a form instance and populate it with data from the request:
-        form = SendForm(request.POST)
+		form = SendForm(request.POST)
         # check whether it's valid:
-        if form.is_valid():
+		if form.is_valid():
             # process the data in form.cleaned_data as required
             # ...
             # redirect to a new URL:
-            model = form.save(commit=False)
-            model.sender = request.user.username
-            model.save()
-            messages.success(request, 'Your message was sent!')
-        else:
-            messages.error(request, 'Please correct the error below.')
+			model = form.save(commit=False)
+			model.sender = request.user.username
+			model.save()
+			messages.success(request, 'Your message was sent!')
+		else:
+			messages.error(request, 'Please correct the error below.')
 
     # if a GET (or any other method) we'll create a blank form
-    else:
-        form = SendForm()
+	else:
+		form = SendForm()
 
-    return render(request, template_name='messenger/send.html', context={'form': form})
+	return render(request, template_name='messenger/send.html', context={'form': form})
 
 @login_required
 def read(request):
 	if not request.user.profile.active:
 		return render(request, template_name='suspended.html')
-    return render(request, template_name='messenger/read_messages.html', context={"messages": Message.objects.filter(recipient__iexact=request.user.username)})
+	return render(request, template_name='messenger/read_messages.html', context={"messages": Message.objects.filter(recipient__iexact=request.user.username)})
 
 @login_required
 def send_message(request):

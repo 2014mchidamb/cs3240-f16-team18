@@ -6,6 +6,7 @@ from django.template import RequestContext
 from .forms import ReportForm, FileForm, AddUserReportForm, AddGroupReportForm
 from .models import Report, ReportFile, Fileship, Ownership, Viewership
 from django.views.static import serve
+from django.contrib.auth import authenticate
 import os
 
 from django.views.decorators.csrf import csrf_exempt
@@ -21,6 +22,32 @@ def reports(request):
 			'myreports': myreports
 	})
 
+@csrf_exempt
+def fda_login(request):
+	requested = request.POST
+	user = authenticate(username=requested['username'], password=requested['password'])
+	if user is not None:
+		return render(request, template_name='reports/filemake.html', context={"fileData": "SUCCESS"})
+	else:
+		return render(request, template_name='reports/filemake.html', context={"fileData": "FAILURE"})
+
+
+
+@csrf_exempt 
+def file_verify(request):
+	requested = request.POST
+	user = requested['user']
+	report_name = requested["report"]
+	file_name = requested["file"]
+	
+	report = Report.objects.get(name=report_name)
+	
+	user_files = ReportFile.objects.filter(reports__name__exact=report_name)
+	for fil in user_files:
+		if (fil.rfile.name == file_name or fil.rfile.name == file_name+".enc"):
+			return render(request, template_name='reports/filemake.html', context={"fileData": fil.rhash})
+	return render(request, template_name='reports/filemake.html', context={"fileData": "No file found within requested report."})
+	
 @csrf_exempt 
 def file_get(request):
 	requested = request.POST
@@ -96,6 +123,7 @@ def file_list(request):
 def file_upload(request):
 	requested = request.POST
 	report_name = requested['rep_name']
+	hashy = requested['hashy']
 	
 	rep = Report.objects.get(name=report_name)
 	
@@ -115,7 +143,7 @@ def file_upload(request):
 	
 	upl = request.FILES.getlist('files')[0]
 	
-	rfile = ReportFile(rfile=upl)
+	rfile = ReportFile(rfile=upl, rhash=hashy)
 	rfile.save()
 	fship = Fileship(report=rep, repfile=rfile)
 	fship.save()
@@ -139,7 +167,7 @@ def create_reports(request):
 			for f in request.FILES.getlist('files'):
 				rfile = ReportFile(rfile=f)
 				rfile.save()
-				fship = Fileship(report=rep, repfile=rfile)
+				fship = Fileship(report=rep, repfile=rfile) #####HERE ADDDDDDDDDDDDDDDDDDDD
 				fship.save()
 			messages.success(request, 'You successfully created a report!')
 			return redirect('/accounts/reports/')

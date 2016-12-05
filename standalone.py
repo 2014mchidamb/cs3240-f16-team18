@@ -3,6 +3,8 @@ from html.parser import HTMLParser
 from Crypto.PublicKey import RSA
 from Crypto import Random
 import os.path
+import getpass
+import hashlib
 
 
 
@@ -92,51 +94,70 @@ def decrypt_file(file_name, sym_key):
         return False
     return True
 
-
-
-
-
+def get_hash(file_name):
+	try:
+		hashy = hashlib.md5()
+		with open(file_name, 'rb') as in_file:
+			hashy.update(in_file.read())
+		return hashy.digest()
+			
+	except FileNotFoundError:
+		print("Files could not be opened.  Check your spelling.")
+		return ""
 
 
 
 #main
 base_url = "http://localhost:8000/"
-login_url = base_url + "accounts/login/"
+login_url = base_url + "fda_login"
 
 print("Welcome to the Standalone App!")
 
-user = input("Username: ")
-password = input("Password: ")
+while(True):
+	user = input("Username: ")
+	password = getpass.getpass("Password: ")
 
-response = requests.get(login_url)
-data = {"username": user, "password": password}
+	response = requests.get(login_url)
+	data = {"username": user, "password": password}
 
-# CSRF Stuff
-class CSRFGetter(HTMLParser):
-	def __init__(self, dict):
-		self.target = dict
-		super(CSRFGetter, self).__init__()
+	# CSRF Stuff
+	class CSRFGetter(HTMLParser):
+		def __init__(self, dict):
+			self.target = dict
+			super(CSRFGetter, self).__init__()
 
-	def handle_starttag(self, tag, attrs):
-		if "csrfmiddlewaretoken" in attrs:
-			self.target["csrfmiddlewaretoken"] = attrs["csrfmiddlewaretoken"]
+		def handle_starttag(self, tag, attrs):
+			if "csrfmiddlewaretoken" in attrs:
+				self.target["csrfmiddlewaretoken"] = attrs["csrfmiddlewaretoken"]
 
-csrf_getter = CSRFGetter(data)
-csrf_getter.feed(response.text)
+	csrf_getter = CSRFGetter(data)
+	csrf_getter.feed(response.text)
 
-# login result
-print(requests.post(login_url, cookies=response.cookies, data=data))
+	# login result
+	#resp = (requests.post(login_url, cookies=response.cookies, data=data))
+
+	response = requests.post(login_url, data=data)
+	#print(response)
+	#print(response.content)
+
+	if response.content != b"SUCCESS":
+		print("Incorrect Login Information. Try again.")
+	else:
+		print("Welcome, ", user, "!", sep="")
+		break
 
 #If successful login...
 
+
 #If this user has logged in before, I don't need to generate a new key.
 #Check based on privateKey.pem on computer.
-if(os.path.isfile('privateKey.pem')):
+#if(os.path.isfile('privateKey.pem')):
 	#open the file, save the key
-	file = open('privateKey.pem', 'r')
+	#file = open('privateKey.pem', 'r')
 	#Note: this is currently the entire key with some text.
 	#print(file.read())
-else:
+#else:
+if(True):
 	random_generator = Random.new().read
 	key = RSA.generate(1024, random_generator)
 	#then store key to file on disk.
@@ -150,7 +171,8 @@ while (True):
 	print("1. List your files and details in report.")
 	print("2. Download a file.")
 	print("3. Upload a file.")
-	print("4. Read a private message.")
+	print("4. Verify file integrity.")
+	#print("5. Read a private message.")
 	print("9. Exit.")
 	cmd = input("Enter a number corresponding to a command: ")
 	if cmd == "0":
@@ -173,7 +195,7 @@ while (True):
 		needed2 = input("Type in name of file: ")
 		print("Loading file...")
 		response = requests.post(dl_link, data={"user": user, "report": needed, "file": needed2})
-		if response.content == "No file found within requested report.":
+		if response.content == b"No file found within requested report.":
 			print("No such file.")
 			continue
 		
@@ -196,6 +218,9 @@ while (True):
 			print("No such file to upload")
 			continue
 		
+		hashy = get_hash(upl)
+		print("Hash of uploaded file is:",hashy)
+		
 		encrypt_file(needed2, str.encode(password))
 		
 		upl=os.path.basename(needed2+".enc")
@@ -203,9 +228,25 @@ while (True):
 		upl = {'files': open(upl,"rb")}
 		
 		print("Uploading file...")
-		response = requests.post(dl_link, data={"rep_name":needed}, files=upl)
+		response = requests.post(dl_link, data={"rep_name":needed, "hashy": hashy}, files=upl)
 		print(response.content)
 	elif cmd == "4":
+		dl_link = base_url + "file_verify"
+		needed  = input("Type in name of report: ")
+		needed2 = input("Type in name of file: ")
+		hashy = get_hash(needed2)
+		if hashy == "":
+			continue
+		response = requests.post(dl_link, data={"user": user, "report": needed, "file": needed2})
+		if response.content == b"No file found within requested report.":
+			print("No such file.")
+			continue
+		print(response.content, hashy)
+		if response.content == hashy:
+			print("Files match.")
+		else:
+			print("Files were altered during transit.")
+	elif cmd == "5NOPE":#Change back to just 5 if reimplemented
 		dl_link = base_url + "read"
 		#probably not right
 		needed = user
