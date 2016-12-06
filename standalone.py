@@ -6,6 +6,18 @@ import os.path
 import getpass
 import hashlib
 import base64
+import cryptography
+import cryptography.hazmat
+import cryptography.hazmat.backends
+import cryptography.hazmat.bindings
+import cryptography.hazmat.primitives
+from cryptography.fernet import Fernet
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import padding
+from base64 import b64encode, b64decode
 
 
 
@@ -14,86 +26,60 @@ from Crypto.PublicKey import RSA
 from Crypto import Random
 from Crypto.Cipher import DES
 from Crypto.Hash import SHA256
-def encrypt_file(file_name, sym_key):
-    """Encrypts file with sym_key"""
-    if not isinstance(sym_key, type(b'')):
-        print("Key must be in bytes")
-        return False
-    sym_8 = (SHA256.new(sym_key)).digest()[0:8]
-    des = DES.new(sym_8, DES.MODE_ECB)
-    try:
-        with open(file_name, 'rb') as in_file:
-            out_name = file_name + ".enc"
-            with open(out_name, 'wb') as out_file:
-                next_chunk = in_file.read(8)
-                while True:
-                    chunk = next_chunk
-                    next_chunk = in_file.read(8)
-                    if next_chunk:
-                        chunk = des.encrypt(chunk)
-                        out_file.write(chunk)
-                    else:
-                        to_fill = 8-len(chunk)
-                        if to_fill is 0:
-                            chunk = des.encrypt(chunk)
-                            out_file.write(chunk)
-                            chunk = des.encrypt(b'10000000')
-                            out_file.write(chunk)
-                        else:
-                            # Pad with 1 then 0s
-                            chunk += b'1'
-                            for i in range(to_fill-1):
-                                chunk += b'0'
-                            chunk = des.encrypt(chunk)
-                            out_file.write(chunk)
-                            chunk = des.encrypt(b'00000000')
-                            out_file.write(chunk)
-                        break
-    except FileNotFoundError:
-        print("Files could not be opened.  Check your spelling.")
-        return False
-    return True
+def encrypt_file(file_name):
+	"""Encrypts file symmetrically"""
+	try:
+		key = Fernet.generate_key()
+		f = Fernet(key)
+		with open(file_name, "rb") as in_file:
+			token = f.encrypt(in_file.read())
+			with open(file_name + ".enc") as out_file:
+				out_file.write(token)
+	except FileNotFoundError:
+		print("Files could not be opened.  Check your spelling.")
+		return False
+	return key
 
 
 def decrypt_file(file_name, sym_key):
-    """Decrypts file using sym_key"""
-    if not isinstance(sym_key, type(b'')):
-        print("Key must be in bytes")
-        return False
-    try:
-        sym_8 = (SHA256.new(sym_key)).digest()[0:8]
-        des = DES.new(sym_8, DES.MODE_ECB)
-        if len(file_name) < 5 or file_name[-4:] != ".enc":
-            print("Not an encoded file")
-            return False
-        with open(file_name, 'rb') as in_file:
-            out_name = file_name[:-4]
-            with open(out_name, 'wb') as out_file:
-                next_chunk = in_file.read(8)
-                next_next_chunk = in_file.read(8)
-                while True:
-                    chunk = next_chunk
-                    next_chunk = next_next_chunk
-                    next_next_chunk = in_file.read(8)
-                    if next_next_chunk:
-                        chunk = des.decrypt(chunk)
-                        out_file.write(chunk)
-                        #print(chunk)
-                    else:
-                        # Last chunk is empty, second to last is
-                        # sentinel and is dropped
-                        indicator_chunk = des.decrypt(next_chunk)
-                        chunk = des.decrypt(chunk)
-                        if indicator_chunk != b'10000000':
-                            end_one = chunk.rfind(b"1")
-                            chunk = chunk[:end_one]
-                        out_file.write(chunk)
-                        #print(chunk)
-                        break
-    except FileNotFoundError:
-        print("Files could not be opened.  Check your spelling.")
-        return False
-    return True
+	"""Decrypts file using sym_key"""
+	if not isinstance(sym_key, type(b'')):
+		print("Key must be in bytes")
+		return False
+	try:
+		sym_8 = (SHA256.new(sym_key)).digest()[0:8]
+		des = DES.new(sym_8, DES.MODE_ECB)
+		if len(file_name) < 5 or file_name[-4:] != ".enc":
+			print("Not an encoded file")
+			return False
+		with open(file_name, 'rb') as in_file:
+			out_name = file_name[:-4]
+			with open(out_name, 'wb') as out_file:
+				next_chunk = in_file.read(8)
+				next_next_chunk = in_file.read(8)
+				while True:
+					chunk = next_chunk
+					next_chunk = next_next_chunk
+					next_next_chunk = in_file.read(8)
+					if next_next_chunk:
+						chunk = des.decrypt(chunk)
+						out_file.write(chunk)
+						#print(chunk)
+					else:
+						# Last chunk is empty, second to last is
+						# sentinel and is dropped
+						indicator_chunk = des.decrypt(next_chunk)
+						chunk = des.decrypt(chunk)
+						if indicator_chunk != b'10000000':
+							end_one = chunk.rfind(b"1")
+							chunk = chunk[:end_one]
+						out_file.write(chunk)
+						#print(chunk)
+						break
+	except FileNotFoundError:
+		print("Files could not be opened.  Check your spelling.")
+		return False
+	return True
 
 def get_hash(file_name):
 	try:
@@ -101,7 +87,7 @@ def get_hash(file_name):
 		with open(file_name, 'rb') as in_file:
 			hashy.update(in_file.read())
 		return hashy.digest()
-			
+
 	except FileNotFoundError:
 		print("Files could not be opened.  Check your spelling.")
 		return ""
@@ -152,19 +138,35 @@ while(True):
 
 #If this user has logged in before, I don't need to generate a new key.
 #Check based on privateKey.pem on computer.
-#if(os.path.isfile('privateKey.pem')):
-	#open the file, save the key
-	#file = open('privateKey.pem', 'r')
-	#Note: this is currently the entire key with some text.
-	#print(file.read())
-#else:
-if(True):
-	random_generator = Random.new().read
-	key = RSA.generate(1024, random_generator)
-	#then store key to file on disk.
-	file = open("privateKey.pem", "wb")
-	file.write(key.exportKey('PEM'))
-	file.close()
+
+private_key = None
+key_filename = user + ".pem"
+
+if os.path.isfile(key_filename):
+	with open(key_filename, "rb") as key_file:
+		private_key = serialization.load_pem_private_key(
+			key_file.read(),
+			password=password,
+			backend=default_backend()
+		)
+
+if private_key is None: # generate and save key
+	private_key = rsa.generate_private_key(
+		public_exponent = 65537,
+		key_size = 2048,
+		backend = default_backend()
+	)
+	pem = private_key.private_bytes(
+		encoding = serialization.Encoding.PEM,
+		format = serialization.PrivateFormat.PKCS8,
+		encryption_algorithm = serialization.BestAvailableEncryption(password.encode())
+	)
+	with open(key_filename, "wb") as key_file:
+		key_file.write(pem)
+
+public_key = private_key.public_key()
+# TODO: Publish public key to keyserver
+
 
 while (True):
 	print("\nWhat would you like to do?")
@@ -181,7 +183,7 @@ while (True):
 		dl_link = base_url + "file_list"
 		response = requests.post(dl_link, data={"user": user, "report": "ALL`REP"})
 		print(response.text.replace(",","\n"))
-	
+
 	elif cmd == "1":
 		rep = input("What is the name of your report? ")
 		print("Files List:")
@@ -199,7 +201,7 @@ while (True):
 		if response.content == b"No file found within requested report.":
 			print("No such file.")
 			continue
-		
+
 		with open(needed2, 'wb') as f:
 			f.write(response.content)
 		print("Downloaded.")
@@ -212,24 +214,32 @@ while (True):
 		dl_link = base_url + "file_upload"
 		needed  = input("Type in name of report: ")
 		needed2  = input("Type in name of file: ")
-		
+
 		upl=os.path.basename(needed2)
-		
+
 		if not os.path.isfile(upl):
 			print("No such file to upload")
 			continue
-		
+
 		hashy = get_hash(upl)
 		print("Hash of uploaded file is:",base64.b64encode(hashy))
-		
-		encrypt_file(needed2, str.encode(password))
-		
+
+		symmetric_key = encrypt_file(needed2, str.encode(password))
+		encrypted_symmetric_key = public_key.encrypt(
+			symmetric_key,
+			padding.OAEP(
+				mgf=padding.MGF1(algorithm=hashes.SHA512()),
+				algorithm=hashes.SHA512(),
+				label=None
+			)
+		)
+
 		upl=os.path.basename(needed2+".enc")
-		
+
 		upl = {'files': open(upl,"rb")}
-		
+
 		print("Uploading file...")
-		response = requests.post(dl_link, data={"rep_name":needed, "hashy": base64.b64encode(hashy)}, files=upl)
+		response = requests.post(dl_link, data={"rep_name":needed, "hashy": base64.b64encode(hashy)}, files=upl, file_key=b64encode(encrypted_symmetric_key))
 		print(response.content)
 	elif cmd == "4":
 		dl_link = base_url + "file_verify"
