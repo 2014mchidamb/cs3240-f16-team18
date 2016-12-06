@@ -37,7 +37,7 @@ def encrypt_file(file_name):
 				out_file.write(token)
 	except FileNotFoundError:
 		print("Files could not be opened.  Check your spelling.")
-		return False
+		return None
 	return key
 
 
@@ -47,35 +47,11 @@ def decrypt_file(file_name, sym_key):
 		print("Key must be in bytes")
 		return False
 	try:
-		sym_8 = (SHA256.new(sym_key)).digest()[0:8]
-		des = DES.new(sym_8, DES.MODE_ECB)
-		if len(file_name) < 5 or file_name[-4:] != ".enc":
-			print("Not an encoded file")
-			return False
-		with open(file_name, 'rb') as in_file:
-			out_name = file_name[:-4]
-			with open(out_name, 'wb') as out_file:
-				next_chunk = in_file.read(8)
-				next_next_chunk = in_file.read(8)
-				while True:
-					chunk = next_chunk
-					next_chunk = next_next_chunk
-					next_next_chunk = in_file.read(8)
-					if next_next_chunk:
-						chunk = des.decrypt(chunk)
-						out_file.write(chunk)
-						#print(chunk)
-					else:
-						# Last chunk is empty, second to last is
-						# sentinel and is dropped
-						indicator_chunk = des.decrypt(next_chunk)
-						chunk = des.decrypt(chunk)
-						if indicator_chunk != b'10000000':
-							end_one = chunk.rfind(b"1")
-							chunk = chunk[:end_one]
-						out_file.write(chunk)
-						#print(chunk)
-						break
+		f = Fernet(sym_key)
+		with open(file_name, "rb") as in_file:
+			token = f.decrypt(in_file.read())
+			with open(file_name[:-4], "wb") as out_file:
+				out_file.write(token)
 	except FileNotFoundError:
 		print("Files could not be opened.  Check your spelling.")
 		return False
@@ -207,7 +183,9 @@ while (True):
 		print("Downloaded.")
 		if ".enc" in needed2:
 			dec_it = input("This file is encrypted.  Do you want to unencrypt? (y to do so)")
-			if dec_it == "y": decrypt_file(needed2, str.encode(password))
+			if dec_it == "y":
+				response = requests.post(base_url + "get_filekey", data={"public_key": public_key, "file": needed2})
+				decrypt_file(needed2, response.content)
 
 	elif cmd == "3":
 		#upload a response
