@@ -17,6 +17,7 @@ class Report(models.Model):
 class ReportFile(models.Model):
 	rfile = models.FileField(blank=True)
 	reports = models.ManyToManyField(Report, through="Fileship")
+	rhash = models.TextField(max_length=100, default="")
 
 class Fileship(models.Model):
 	report = models.ForeignKey(Report, on_delete=models.CASCADE)
