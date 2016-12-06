@@ -1,5 +1,5 @@
-base_url = "http://localhost:8000/"
-#base_url = "https://mighty-fjord-54317.herokuapp.com/"
+#base_url = "http://localhost:8000/"
+base_url = "https://mighty-fjord-54317.herokuapp.com/"
 
 import requests
 from html.parser import HTMLParser
