@@ -22,7 +22,7 @@ class ProfileForm(forms.ModelForm):
 
 	class Meta:
 		model = Profile
-		fields = ['birth_date', 'location', 'bio']
+		fields = ['birth_date', 'location', 'bio', 'priv']
 
 class GroupForm(forms.ModelForm):
 	def __init__(self, *args, **kwargs):

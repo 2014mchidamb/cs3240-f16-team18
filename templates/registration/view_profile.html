@@ -26,6 +26,7 @@
 				{% csrf_token %}
 				{% if user.profile.active %}
 					<button class="btn btn-default btn-large btn-block" type="submit" name="suspend"> <h2> Suspend </h2> </button>
+					<button class="btn btn-default btn-large btn-block" type"submit" name="makesm"> <h2> Make Site Manager </h2> </button>
 				{% else %}
 					<button class="btn btn-default btn-large btn-block" type="submit" name="activate"> <h2> Activate </h2> </button>
 				{% endif %}

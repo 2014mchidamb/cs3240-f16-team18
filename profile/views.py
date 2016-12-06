@@ -30,6 +30,10 @@ def view_profile(request, username):
 		user.profile.active = True
 		user.save()
 		return redirect('/public/users/')
+	if 'makesm' in request.POST:
+		user.profile.site_manager = True
+		user.save()
+		return redirect('/public/users/')
 	return render(request, 'registration/view_profile.html', {
 		'user': user,
 		'is_sm': request.user.profile.site_manager
@@ -161,7 +165,7 @@ def public_groups(request):
 def public_users(request):
 	if not request.user.profile.active:
 		return render(request, template_name='suspended.html')
-	pubusers = User.objects.all()
+	pubusers = User.objects.filter(profile__priv=False)
 	return render(request, 'registration/public_users.html', {
 		'pubusers': pubusers
 	})
