@@ -21,7 +21,7 @@
 					<h3> <strong> Bio: </strong> {{ user.profile.bio }} </h3>
 				</div>
 			</div>
-			{% if is_sm %}
+			{% if is_sm and not user.profile.site_manager %}
 				<form method="post">
 				{% csrf_token %}
 				{% if user.profile.active %}
