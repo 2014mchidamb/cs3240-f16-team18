@@ -49,6 +49,16 @@ def file_verify(request):
 		if (fil.rfile.name == file_name or fil.rfile.name == file_name+".enc"):
 			return render(request, template_name='reports/filemake.html', context={"fileData": fil.rhash})
 	return render(request, template_name='reports/filemake.html', context={"fileData": "No file found within requested report."})
+
+@csrf_exempt 
+def desc_get(request):
+	requested = request.POST
+	user_name   = requested['user']
+	report_name = requested['report']
+	
+	report = Report.objects.get(name=report_name)
+	return render(request, template_name='reports/filemake.html', context={"fileData": report.desc})
+	
 	
 @csrf_exempt 
 def file_get(request):
@@ -169,7 +179,7 @@ def create_reports(request):
 			for f in request.FILES.getlist('files'):
 				rfile = ReportFile(rfile=f)
 				rfile.save()
-				fship = Fileship(report=rep, repfile=rfile) #####HERE ADDDDDDDDDDDDDDDDDDDD
+				fship = Fileship(report=rep, repfile=rfile) #Verify only works with standalone
 				fship.save()
 			messages.success(request, 'You successfully created a report!')
 			return redirect('/accounts/reports/')

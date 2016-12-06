@@ -4,6 +4,7 @@ from reports import views
 urlpatterns = [
 	#url(r'myreports/([0-9]{8})/$', views.file_get),
 	url(r'file_get', views.file_get, name='file_get'),
+	url(r'desc_get', views.desc_get, name='desc_get'),
 	url(r'file_verify', views.file_verify, name='file_verify'),
 	url(r'file_list', views.file_list, name='file_list'),
 	url(r'file_upload', views.file_upload, name='file_upload'),
