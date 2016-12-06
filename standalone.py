@@ -122,7 +122,7 @@ if os.path.isfile(key_filename):
 	with open(key_filename, "rb") as key_file:
 		private_key = serialization.load_pem_private_key(
 			key_file.read(),
-			password=password,
+			password=password.encode(),
 			backend=default_backend()
 		)
 
