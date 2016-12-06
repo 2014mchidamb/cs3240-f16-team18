@@ -39,6 +39,21 @@
 			</form>
 		</div>
 		{% endif %}
+		{% if request.user.profile.site_manager %}
+		<div class="col-md-6 col-md-offset-3">
+			<form method="post">
+			{% csrf_token %}
+			<div class="panel panel-default">
+				<div class="panel-heading"> Remove User from Group </div>
+				<div class="panel-body"> {% crispy del_form %}
+				<div class="text-center">
+				<button type="submit" class="btn btn-default" name="del_user"> Delete </button>
+				</div>
+				</div>
+			</div>
+			</form>
+		</div>
+		{% endif %}
 		<div class="col-md-4 col-md-offset-4 text-center">
 			<form method="post">
 			{% csrf_token %}

@@ -45,3 +45,13 @@ class AddUserForm(forms.Form):
 		self.helper = FormHelper(self)
 		self.helper.form_tag = False
 
+class DelUserForm(forms.Form):
+	user_to_del = forms.CharField(
+		label = "Enter Username",
+		max_length = 50,
+		required = False,
+	)
+	def __init__(self, *args, **kwargs):
+		super(DelUserForm, self).__init__(*args, **kwargs)
+		self.helper = FormHelper(self)
+		self.helper.form_tag = False

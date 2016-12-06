@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.shortcuts import redirect, render, render_to_response, HttpResponse
 from django.template import RequestContext
-from .forms import ProfileForm, UserForm, GroupForm, AddUserForm
+from .forms import ProfileForm, UserForm, GroupForm, AddUserForm, DelUserForm
 from .models import Group, Membership, Profile
 
 # Create your views here.
@@ -144,12 +144,24 @@ def view_group(request, group_name):
 			return redirect('/groups/'+group_name)
 	else:
 		add_form = AddUserForm()
+	if 'del_user' in request.POST:
+		del_form = DelUserForm(request.POST)
+		if del_form.is_valid():
+			user_to_del = User.objects.filter(username=del_form.cleaned_data['user_to_del']).first()
+			if user_to_del:
+				m = Membership.objects.get(user=user_to_del, group=group)
+				m.delete()
+			return redirect('/groups/'+group_name)
+	else:
+		del_form = DelUserForm()
+			
 	return render(request, 'registration/group_profile.html', {
 		'group': group,
 		'members': group.members.all(),
 		'is_member': is_member,
 		'cant_view': cant_view,
-		'add_form': add_form
+		'add_form': add_form,
+		'del_form': del_form
 	})
 
 @login_required
