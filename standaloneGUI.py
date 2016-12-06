@@ -1,4 +1,5 @@
 base_url = "http://localhost:8000/"
+#base_url = "https://mighty-fjord-54317.herokuapp.com/"
 
 import requests
 from html.parser import HTMLParser
@@ -10,6 +11,7 @@ import hashlib
 import tkinter
 from tkinter import filedialog
 from tkinter import messagebox
+import base64
 
 #######Crypto Stuff Here
 from Crypto.PublicKey import RSA
@@ -102,7 +104,7 @@ def get_hash(file_name):
 		hashy = hashlib.md5()
 		with open(file_name, 'rb') as in_file:
 			hashy.update(in_file.read())
-		return hashy.digest()
+		return base64.b64encode(hashy.digest())
 			
 	except FileNotFoundError:
 		print("Files could not be opened.  Check your spelling.")
@@ -236,6 +238,21 @@ class App:
 	
 	def verify(self, event):
 		print("Verifying...")
+		dl_link = base_url + "file_verify"
+		needed  = self.nameOfRep
+		needed2 = self.fileName.get("1.0",tkinter.END).strip().replace(".enc", "")
+		hashy = get_hash(needed2)
+		if hashy == "":
+			return
+		response = requests.post(dl_link, data={"user": user, "report": needed, "file": needed2})
+		if response.content == b"No file found within requested report.":
+			print("No such file.")
+			return
+		print(response.content, hashy)
+		if response.content == hashy:
+			dec_it = messagebox.askquestion("This file was not changed", "There are no changes.", icon='warning')
+		else:
+			dec_it = messagebox.askquestion("This file was altered!", "There were changes made!", icon='warning')
 		
 	def __init__(self):
 		root = tkinter.Tk("File Download Application")
