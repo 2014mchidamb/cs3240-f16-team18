@@ -29,3 +29,12 @@ class Ownership(models.Model):
 class Viewership(models.Model):
 	user = models.ForeignKey(User, on_delete=models.CASCADE)
 	report = models.ForeignKey(Report, on_delete=models.CASCADE)
+
+class Folder(models.Model):
+	name = models.CharField(max_length=30, blank=True)
+	username = models.CharField(max_length=50, blank=True)
+	reports = models.ManyToManyField(Report, through="Reportship")
+
+class Reportship(models.Model):
+	folder = models.ForeignKey(Folder, on_delete=models.CASCADE)
+	report = models.ForeignKey(Report, on_delete=models.CASCADE)

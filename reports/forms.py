@@ -45,3 +45,14 @@ class AddGroupReportForm(forms.Form):
 		super(AddGroupReportForm, self).__init__(*args, **kwargs)
 		self.helper = FormHelper(self)
 		self.helper.form_tag = False
+
+class AddFolderForm(forms.Form):
+	foldername = forms.CharField(
+		label = "Enter Folder Name",
+		max_length = 50,
+		required = False,
+	)
+	def __init__(self, *args, **kwargs):
+		super(AddFolderForm, self).__init__(*args, **kwargs)
+		self.helper = FormHelper(self)
+		self.helper.form_tag = False
