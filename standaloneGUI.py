@@ -1,3 +1,5 @@
+base_url = "http://localhost:8000/"
+
 import requests
 from html.parser import HTMLParser
 from Crypto.PublicKey import RSA
@@ -5,9 +7,9 @@ from Crypto import Random
 import os.path
 import getpass
 import hashlib
-import base64
-
-
+import tkinter
+from tkinter import filedialog
+from tkinter import messagebox
 
 #######Crypto Stuff Here
 from Crypto.PublicKey import RSA
@@ -97,7 +99,7 @@ def decrypt_file(file_name, sym_key):
 
 def get_hash(file_name):
 	try:
-		hashy = hashlib.sha512()
+		hashy = hashlib.md5()
 		with open(file_name, 'rb') as in_file:
 			hashy.update(in_file.read())
 		return hashy.digest()
@@ -109,7 +111,6 @@ def get_hash(file_name):
 
 
 #main
-base_url = "http://localhost:8000/"
 login_url = base_url + "fda_login"
 
 print("Welcome to the Standalone App!")
@@ -147,115 +148,188 @@ while(True):
 		print("Welcome, ", user, "!", sep="")
 		break
 
-#If successful login...
 
 
-#If this user has logged in before, I don't need to generate a new key.
-#Check based on privateKey.pem on computer.
-#if(os.path.isfile('privateKey.pem')):
-	#open the file, save the key
-	#file = open('privateKey.pem', 'r')
-	#Note: this is currently the entire key with some text.
-	#print(file.read())
-#else:
-if(True):
-	random_generator = Random.new().read
-	key = RSA.generate(1024, random_generator)
-	#then store key to file on disk.
-	file = open("privateKey.pem", "wb")
-	file.write(key.exportKey('PEM'))
-	file.close()
-
-while (True):
-	print("\nWhat would you like to do?")
-	print("0. List your reports.")
-	print("1. List your files and details in report.")
-	print("2. Download a file.")
-	print("3. Upload a file.")
-	print("4. Verify file integrity.")
-	#print("5. Read a private message.")
-	print("9. Exit.")
-	cmd = input("Enter a number corresponding to a command: ")
-	if cmd == "0":
-		print("Reports List:")
+class App:
+	def OnDouble(self, event):
+		clicked = event.widget
+		selected = clicked.curselection()
+		self.nameOfRep = clicked.get(selected[0])
+		colon=self.nameOfRep.find(':')
+		self.nameOfRep = self.nameOfRep[0:colon]
+		print(self.nameOfRep)
+		dl_link = base_url + "desc_get"
+		response = requests.post(dl_link, data={"user": user, "report": self.nameOfRep})
+		print (response.text)
+		self.descr.delete("1.0", tkinter.END)
+		self.descr.insert(tkinter.END, response.text)
 		dl_link = base_url + "file_list"
-		response = requests.post(dl_link, data={"user": user, "report": "ALL`REP"})
-		print(response.text.replace(",","\n"))
-	
-	elif cmd == "1":
-		rep = input("What is the name of your report? ")
-		print("Files List:")
-		dl_link = base_url + "file_list"
-		response = requests.post(dl_link, data={"user": user, "report": rep})
+		response = requests.post(dl_link, data={"user": user, "report": self.nameOfRep})
 		print(response.text)
+		results = response.text[1:-1]
+		listFiles = results.split(",")
+		print(listFiles)
+		self.listOfFiles.delete(0,tkinter.END)
+		for i in listFiles:
+			self.listOfFiles.insert(tkinter.END,i.strip().replace("'",""))
+		self.listOfFiles.bind("<Double-Button-1>", self.OnFileDouble)
+		self.fileName.delete("1.0",tkinter.END)
+	
+	def OnFileDouble(self, event):
+		clicked = event.widget
+		selected = clicked.curselection()
+		nameOfFile = clicked.get(selected[0])
+		
+		self.fileName.delete("1.0",tkinter.END)
+		self.fileName.insert(tkinter.END,nameOfFile)
 
-	elif cmd == "2":
+	def download(self, event):
 		#load the requested item.
 		dl_link = base_url + "file_get"
-		needed  = input("Type in name of report: ")
-		needed2 = input("Type in name of file: ")
+		if self.nameOfRep is None:
+			return
+		needed  = self.nameOfRep
+		needed2 = self.fileName.get("1.0",tkinter.END).strip()
+		print(needed,needed2)
 		print("Loading file...")
 		response = requests.post(dl_link, data={"user": user, "report": needed, "file": needed2})
 		if response.content == b"No file found within requested report.":
 			print("No such file.")
-			continue
+			return
 		
 		with open(needed2, 'wb') as f:
 			f.write(response.content)
 		print("Downloaded.")
 		if ".enc" in needed2:
-			dec_it = input("This file is encrypted.  Do you want to unencrypt? (y to do so)")
-			if dec_it == "y": decrypt_file(needed2, str.encode(password))
-
-	elif cmd == "3":
-		#upload a response
+			#dec_it = input("This file is encrypted.  Do you want to unencrypt? (y to do so)")
+			#if dec_it == "y": decrypt_file(needed2, str.encode(password))
+			dec_it = messagebox.askquestion("This file is encrypted.", "Do you want to unencrypt?", icon='warning')
+			if dec_it == 'yes':
+				decrypt_file(needed2, str.encode(password))
+	
+	def upload(self, event):
 		dl_link = base_url + "file_upload"
-		needed  = input("Type in name of report: ")
-		needed2  = input("Type in name of file: ")
+		needed  = self.nameOfRep
+		newroot = tkinter.Tk()
+		newroot.withdraw()
+		needed2 = filedialog.askopenfilename()
+		print(needed,needed2)
 		
-		upl=os.path.basename(needed2)
+		upl=os.path.abspath(needed2)
 		
 		if not os.path.isfile(upl):
 			print("No such file to upload")
-			continue
+			return
 		
 		hashy = get_hash(upl)
-		print("Hash of uploaded file is:",base64.b64encode(hashy))
+		print("Hash of uploaded file is:",hashy)
 		
 		encrypt_file(needed2, str.encode(password))
 		
-		upl=os.path.basename(needed2+".enc")
+		upl=os.path.abspath(needed2+".enc")
 		
 		upl = {'files': open(upl,"rb")}
 		
 		print("Uploading file...")
-		response = requests.post(dl_link, data={"rep_name":needed, "hashy": base64.b64encode(hashy)}, files=upl)
+		response = requests.post(dl_link, data={"rep_name":needed, "hashy": hashy}, files=upl)
 		print(response.content)
-	elif cmd == "4":
-		dl_link = base_url + "file_verify"
-		needed  = input("Type in name of report: ")
-		needed2 = input("Type in name of file: ")
-		hashy = get_hash(needed2)
-		if hashy == "":
-			continue
-		response = requests.post(dl_link, data={"user": user, "report": needed, "file": needed2})
-		if response.content == b"No file found within requested report.":
-			print("No such file.")
-			continue
-		print(response.content, hashy)
-		if base64.b64decode(response.content) == hashy:
-			print("Files match.")
-		else:
-			print("Files were altered during transit.")
-	elif cmd == "5NOPE":#Change back to just 5 if reimplemented
-		dl_link = base_url + "read"
-		#probably not right
-		needed = user
-		print("Loading message...")
-		response = requests.get(dl_link + '?name=' + needed)
-		print(response.content)
-	elif cmd == "9":
-		print("Goodbye.")
-		exit()
-	else:
-		print("Invalid command.")
+	
+	def verify(self, event):
+		print("Verifying...")
+		
+	def __init__(self):
+		root = tkinter.Tk("File Download Application")
+		root.minsize(400,600);
+
+		selectFrame = tkinter.Frame(root)
+		selectFrame.pack()
+		scroll = tkinter.Scrollbar(selectFrame)
+		scroll.pack(side=tkinter.RIGHT, fill=tkinter.Y)
+
+		listOfReports = tkinter.Listbox(selectFrame, width=100)
+		listOfReports.grid_propagate(0)
+		
+
+		dl_link = base_url + "file_list"
+		response = requests.post(dl_link, data={"user": user, "report": "ALL`REP"})
+		results = response.text[1:-1]
+		print(results)
+		listReps = results.split(",")
+		print(listReps)
+		for i in listReps:
+			listOfReports.insert(tkinter.END,i.strip())
+		listOfReports.bind("<Double-Button-1>", self.OnDouble)
+
+		listOfReports.config(yscrollcommand=scroll.set)
+		scroll.config(command=listOfReports.yview)
+		listOfReports.pack()
+		
+		textThing = tkinter.Label(root, text="REPORT SUMMARY")
+		textThing.pack()
+		
+		self.descr = tkinter.Text(root, height=5, width=50)
+		self.descr.pack()
+		self.descr.insert(tkinter.END, "Click to select a report.")
+		
+		textThing = tkinter.Label(root, text="FILES AVAILABLE FOR DOWNLOAD")
+		textThing.pack()
+		
+		selectFileFrame = tkinter.Frame(root)
+		selectFileFrame.pack()
+		scrollFile = tkinter.Scrollbar(selectFileFrame)
+		scrollFile.pack(side=tkinter.RIGHT, fill=tkinter.Y)
+
+		self.listOfFiles = tkinter.Listbox(selectFileFrame, width=100)
+		self.listOfFiles.grid_propagate(0)
+		#ADD STUFF HERE
+		#listOfFiles.bind("<Double-Button-1>", self.OnFileDouble)
+
+		self.listOfFiles.config(yscrollcommand=scroll.set)
+		scrollFile.config(command=self.listOfFiles.yview)
+		self.listOfFiles.pack()
+		
+		textThing = tkinter.Label(root, text="FILE CURRENTLY SELECTED")
+		textThing.pack()
+		
+		self.fileName = tkinter.Text(root, height=1, width=50)
+		self.fileName.pack()
+		self.fileName.insert(tkinter.END, "No file selected")
+		
+		dlButton = tkinter.Button(root, text="DOWNLOAD")
+		dlButton.bind("<Double-Button-1>", self.download)
+		dlButton.pack()
+		
+		ulButton = tkinter.Button(root, text="UPLOAD")
+		ulButton.bind("<Double-Button-1>", self.upload)
+		ulButton.pack()
+		
+		vButton = tkinter.Button(root, text="VERIFY")
+		vButton.bind("<Double-Button-1>", self.verify)
+		vButton.pack()
+		
+		root.mainloop()
+		
+app=App()
+
+
+
+	
+	# elif cmd == "3":
+		# #upload a response
+		
+	# elif cmd == "4":
+		# dl_link = base_url + "file_verify"
+		# needed  = input("Type in name of report: ")
+		# needed2 = input("Type in name of file: ")
+		# hashy = get_hash(needed2)
+		# if hashy == "":
+			# continue
+		# response = requests.post(dl_link, data={"user": user, "report": needed, "file": needed2})
+		# if response.content == b"No file found within requested report.":
+			# print("No such file.")
+			# continue
+		# print(response.content, hashy)
+		# if response.content == hashy:
+			# print("Files match.")
+		# else:
+			# print("Files were altered during transit.")

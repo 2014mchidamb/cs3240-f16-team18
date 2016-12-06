@@ -1,5 +1,3 @@
-from Crypto.PublicKey import RSA
-from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 from django.contrib import messages
@@ -13,15 +11,15 @@ from .models import Message
 def send(request):
 	if not request.user.profile.active:
 		return render(request, template_name='suspended.html')
-	# if this is a POST request we need to process the form data
+    # if this is a POST request we need to process the form data
 	if request.method == 'POST':
-		# create a form instance and populate it with data from the request:
+        # create a form instance and populate it with data from the request:
 		form = SendForm(request.POST)
-		# check whether it's valid:
+        # check whether it's valid:
 		if form.is_valid():
-			# process the data in form.cleaned_data as required
-			# ...
-			# redirect to a new URL:
+            # process the data in form.cleaned_data as required
+            # ...
+            # redirect to a new URL:
 			model = form.save(commit=False)
 			model.sender = request.user.username
 			recipient = User.objects.get(username=model.recipient)
@@ -36,7 +34,7 @@ def send(request):
 		else:
 			messages.error(request, 'Please correct the error below.')
 
-	# if a GET (or any other method) we'll create a blank form
+    # if a GET (or any other method) we'll create a blank form
 	else:
 		form = SendForm()
 
