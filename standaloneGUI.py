@@ -159,6 +159,7 @@ class App:
 		self.nameOfRep = clicked.get(selected[0])
 		colon=self.nameOfRep.find(':')
 		self.nameOfRep = self.nameOfRep[0:colon]
+		self.listOfFiles.delete(0,tkinter.END)
 		print(self.nameOfRep)
 		dl_link = base_url + "desc_get"
 		response = requests.post(dl_link, data={"user": user, "report": self.nameOfRep})
@@ -168,12 +169,13 @@ class App:
 		dl_link = base_url + "file_list"
 		response = requests.post(dl_link, data={"user": user, "report": self.nameOfRep})
 		print(response.text)
+		if response.text == "No such report":
+			return
 		results = response.text[1:-1]
 		listFiles = results.split(",")
 		print(listFiles)
-		self.listOfFiles.delete(0,tkinter.END)
 		for i in listFiles:
-			self.listOfFiles.insert(tkinter.END,i.strip().replace("'",""))
+			self.listOfFiles.insert(tkinter.END,i.strip().replace("'","")[1:])
 		self.listOfFiles.bind("<Double-Button-1>", self.OnFileDouble)
 		self.fileName.delete("1.0",tkinter.END)
 	
@@ -200,6 +202,7 @@ class App:
 			return
 		
 		with open(needed2, 'wb') as f:
+			print(response.content)
 			f.write(response.content)
 		print("Downloaded.")
 		if ".enc" in needed2:
@@ -274,7 +277,7 @@ class App:
 		listReps = results.split(",")
 		print(listReps)
 		for i in listReps:
-			listOfReports.insert(tkinter.END,i.strip())
+			listOfReports.insert(tkinter.END,i.strip()[1:])
 		listOfReports.bind("<Double-Button-1>", self.OnDouble)
 
 		listOfReports.config(yscrollcommand=scroll.set)
