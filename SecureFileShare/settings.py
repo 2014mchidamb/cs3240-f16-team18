@@ -46,7 +46,7 @@ INSTALLED_APPS = [
 	'search',
     'registration',
     'cryptography',
-    'dj-database-url',
+    #'dj-database-url',
     'pycrypto',
 ]
 
