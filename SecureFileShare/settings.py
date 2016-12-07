@@ -40,10 +40,14 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'profile',
-	'crispy_forms',
     'messenger',
 	'reports',
-	'search'
+    'crispy_forms',
+	'search',
+    'registration',
+    'cryptography',
+    'dj-database-url',
+    'pycrypto',
 ]
 
 MIDDLEWARE = [
