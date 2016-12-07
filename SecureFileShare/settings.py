@@ -47,7 +47,7 @@ INSTALLED_APPS = [
     'registration',
     'cryptography',
     #'dj-database-url',
-    'pycrypto',
+    #'pycrypto',
 ]
 
 MIDDLEWARE = [
